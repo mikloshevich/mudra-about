@@ -2,12 +2,12 @@ import { Suspense } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { Environment } from '@react-three/drei'
 import ChickenModel from './ChickenModel'
-import hdri1 from '../../../assets/aboutPage/chicken/mudra-hdri/hdri1.png'
-import hdri2 from '../../../assets/aboutPage/chicken/mudra-hdri/hdri2.png'
-import hdri3 from '../../../assets/aboutPage/chicken/mudra-hdri/hdri3.png'
-import hdri4 from '../../../assets/aboutPage/chicken/mudra-hdri/hdri4.png'
-import hdri5 from '../../../assets/aboutPage/chicken/mudra-hdri/hdri5.png'
-import hdri6 from '../../../assets/aboutPage/chicken/mudra-hdri/hdri6.png'
+// import hdri1 from '../../../assets/aboutPage/chicken/mudra-hdri/hdri1.png'
+// import hdri2 from '../../../assets/aboutPage/chicken/mudra-hdri/hdri2.png'
+// import hdri3 from '../../../assets/aboutPage/chicken/mudra-hdri/hdri3.png'
+// import hdri4 from '../../../assets/aboutPage/chicken/mudra-hdri/hdri4.png'
+// import hdri5 from '../../../assets/aboutPage/chicken/mudra-hdri/hdri5.png'
+// import hdri6 from '../../../assets/aboutPage/chicken/mudra-hdri/hdri6.png'
 
 const AboutChicken = ({ chickenModel, setModelLoaded }) => {
     return (
@@ -22,7 +22,7 @@ const AboutChicken = ({ chickenModel, setModelLoaded }) => {
                             <spotLight position={[-2, 7, 5]} lookAt={[0, 0, 0]} intensity={5} color={0xffffff} />
                             <pointLight position={[-2, 7, 3]} intensity={3} color={0xffffff} />
                             <ChickenModel chickenModel={chickenModel} setModelLoaded={setModelLoaded} />
-                            <Environment preset="forest" background />
+                            <Environment preset="forest" />
                             {/* <Environment files={[hdri1, hdri2, hdri3, hdri4, hdri5, hdri6]} preset={null} /> */}
                         </Suspense>
                     </Canvas>
