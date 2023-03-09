@@ -1,0 +1,31 @@
+.homePage {
+    --shadow-alpha: 0;
+    background-color: #171717;
+    overflow: hidden;
+    &__center {
+        height: 100vh;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transform-origin: center;
+    }
+
+    .pathCanvas {
+        // opacity: 0;
+        z-index: 2;
+    }
+
+    .soundCanvasContainer {
+        position: absolute;
+        transition: opacity 300ms linear, transform 700ms ease-in-out;
+    }
+
+    .soundCanvas {
+        --color-deg: 0deg;
+        background-color: hsl(0, 0%, 15%);
+        pointer-events: none;
+        border-radius: 50%;
+        filter: blur(5px) contrast(1.8); // hue-rotate(var(--color-deg)) saturate(0.4)
+    }
+}

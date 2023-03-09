@@ -1,0 +1,20 @@
+@font-face {
+    font-family: 'SF-UI';
+    src: local('SF-UI'), url('../assets/general/fonts/SF-UI-Text-Regular.otf') format('opentype');
+    font-style: normal;
+    font-weight: 400;
+}
+
+@font-face {
+    font-family: 'SF-UI';
+    src: local('SF-UI'), url('../assets/general/fonts/SF-UI-Text-Medium.otf') format('opentype');
+    font-style: normal;
+    font-weight: 500;
+}
+
+@font-face {
+    font-family: 'Saol';
+    src: local('Saol'), url('../assets/general/fonts/SaolText-RegularItalic.otf') format('opentype');
+    font-style: italic;
+    font-weight: 400;
+}
