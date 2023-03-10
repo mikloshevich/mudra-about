@@ -101,7 +101,7 @@
         width: 100%;
         height: 60%;
         // max-height: 700px;
-        stroke: #fefefe;
+        stroke: #b1ff9d;
     }
 }
 
@@ -250,6 +250,11 @@
             border-radius: 25px;
             display: inline-block;
             background-color: #fefefe;
+            transition: color 300ms, background-color 300ms;
+            &:hover {
+                color: #fefefe;
+                background-color: #171717;
+            }
         }
     }
 

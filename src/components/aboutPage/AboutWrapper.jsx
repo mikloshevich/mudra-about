@@ -92,7 +92,7 @@ const AboutWrapper = () => {
                             trigger: scrollRef.current,
                             pin: true,
                             scrub: 1,
-                            end: '+=9000',
+                            end: '+=11000',
                             // markers: true,
                         },
                     })
@@ -320,7 +320,7 @@ const AboutWrapper = () => {
                     })
                 }
             }, scrollRef.current)
-        }, 500)
+        }, 600)
 
         return () => {
             if (gCtx) gCtx.revert()
