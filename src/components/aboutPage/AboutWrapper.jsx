@@ -92,7 +92,7 @@ const AboutWrapper = () => {
                             trigger: scrollRef.current,
                             pin: true,
                             scrub: 1,
-                            end: '+=6000',
+                            end: '+=9000',
                             // markers: true,
                         },
                     })
@@ -190,17 +190,13 @@ const AboutWrapper = () => {
                     })
 
                     gsap.to('.aboutSlide__discount_text', {
-                        rotate: 720,
-                        scrollTrigger: {
-                            trigger: '.aboutSlide7',
-                            containerAnimation: scrollTween,
-                            start: 'left right',
-                            end: `right left`,
-                            scrub: true,
-                            // markers: true,
-                        },
+                        duration: 20,
+                        rotate: 360,
+                        repeat: -1,
+                        ease: 'none',
                     })
 
+                    // Sanskrit:
                     gsap.timeline({
                         scrollTrigger: {
                             trigger: '.aboutChicken__wrapper',
@@ -214,24 +210,27 @@ const AboutWrapper = () => {
                         autoAlpha: 0,
                     })
 
+                    // ================ Chicken Animation =====================
+
+                    // Chicken:
                     gsap.to('.aboutChicken__wrapper', {
-                        x: '400vw',
+                        x: '600vw',
                         scrollTrigger: {
                             trigger: '.aboutChicken__wrapper',
                             containerAnimation: scrollTween,
                             start: 'left left',
-                            end: `left+=${window.innerWidth * 5} right`,
+                            end: `left+=${window.innerWidth * 7} right`,
                             scrub: true,
                             // markers: true,
                         },
                     })
                     gsap.to('.aboutSlide7', {
-                        x: '100vw',
+                        x: '200vw',
                         scrollTrigger: {
                             trigger: '.aboutSlide7',
                             containerAnimation: scrollTween,
                             start: 'left left',
-                            end: `right left`,
+                            end: `right+=${window.innerWidth} left`,
                             scrub: true,
                             // markers: true,
                         },
@@ -241,7 +240,7 @@ const AboutWrapper = () => {
                             trigger: '.aboutChicken__wrapper',
                             containerAnimation: scrollTween,
                             start: 'left left',
-                            end: `left+=${window.innerWidth * 4.5} right`,
+                            end: `left+=${window.innerWidth * 6.5} right`,
                             scrub: true,
                             // markers: true,
                         },
@@ -315,6 +314,9 @@ const AboutWrapper = () => {
                     )
                     chickenTl.to(chickenModel?.current.rotation, {
                         y: Math.PI * 4 + Math.PI,
+                    })
+                    chickenTl.to(chickenModel?.current.rotation, {
+                        y: Math.PI * 5 + Math.PI,
                     })
                 }
             }, scrollRef.current)

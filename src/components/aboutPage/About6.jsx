@@ -56,6 +56,8 @@ const About6 = () => {
             <section className="aboutSlide aboutSlide5 aboutSlide__empty"></section>
             <section className="aboutSlide aboutSlide5 aboutSlide__empty"></section>
             <section className="aboutSlide aboutSlide5 aboutSlide__empty"></section>
+            <section className="aboutSlide aboutSlide5 aboutSlide__empty"></section>
+            <section className="aboutSlide aboutSlide5 aboutSlide__empty"></section>
         </>
     )
 }

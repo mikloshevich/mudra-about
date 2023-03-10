@@ -29,18 +29,18 @@ const ChickenModel = ({ chickenModel, setModelLoaded }) => {
             rotation={[0, 0, 0]}>
             <meshPhysicalMaterial
                 attach="material"
-                roughness={0.1}
+                roughness={0.0}
                 metalness={1.0}
                 transmission={0.0}
                 reflectivity={1.0}
-                thickness={1.0}
-                clearcoat={0.2}
+                thickness={0.01}
+                clearcoat={0.0}
                 clearcoatRoughness={0.0}
-                ior={2.5}
+                ior={1.5}
                 color={0xffffff}
                 flatShading={false}
                 transparent={false}
-                envMapIntensity={3.5}
+                envMapIntensity={1.5}
                 // opacity={0.0}
             />
         </mesh>
@@ -62,7 +62,7 @@ const AboutChicken = ({ chickenModel, setModelLoaded }) => {
                             <ChickenModel chickenModel={chickenModel} setModelLoaded={setModelLoaded} />
                             {/* <Environment preset="forest" /> */}
                             <Environment
-                                files={[hdriBlack, hdriBlack, hdriBlack, hdriBlack, hdriBlack, hdriNew5]}
+                                files={[hdriBlack, hdriNew5, hdriBlack, hdriBlack, hdriBlack, hdriNew5]}
                                 preset={null}
                             />
                         </Suspense>
