@@ -1,13 +1,51 @@
 import { Suspense } from 'react'
 import { Canvas } from '@react-three/fiber'
-import { Environment } from '@react-three/drei'
-import ChickenModel from './ChickenModel'
-// import hdri1 from '../../../assets/aboutPage/chicken/mudra-hdri/hdri1.png'
-// import hdri2 from '../../../assets/aboutPage/chicken/mudra-hdri/hdri2.png'
-// import hdri3 from '../../../assets/aboutPage/chicken/mudra-hdri/hdri3.png'
-// import hdri4 from '../../../assets/aboutPage/chicken/mudra-hdri/hdri4.png'
-// import hdri5 from '../../../assets/aboutPage/chicken/mudra-hdri/hdri5.png'
-// import hdri6 from '../../../assets/aboutPage/chicken/mudra-hdri/hdri6.png'
+import { Environment, useGLTF, useProgress } from '@react-three/drei'
+import model from '../../../assets/aboutPage/chicken/gltf/chicken3_threejs_smooth2.gltf?url'
+import hdri1 from '../../../assets/aboutPage/chicken/mudra-studio-hdri/hdri1.png'
+import hdri6 from '../../../assets/aboutPage/chicken/mudra-studio-hdri/hdri6.png'
+import hdri7 from '../../../assets/aboutPage/chicken/mudra-studio-hdri/hdri7.png'
+import hdriNew1 from '../../../assets/aboutPage/chicken/mudra-studio-hdri/hdriNew1.png'
+import hdriNew2 from '../../../assets/aboutPage/chicken/mudra-studio-hdri/hdriNew2.png'
+import hdriNew5 from '../../../assets/aboutPage/chicken/mudra-studio-hdri/hdriNew5.png'
+import hdriBlack from '../../../assets/aboutPage/chicken/mudra-studio-hdri/hdriBlack.png'
+
+const ChickenModel = ({ chickenModel, setModelLoaded }) => {
+    const { scene } = useGLTF(model)
+
+    useProgress((state) => {
+        if (state.progress === 100) {
+            setModelLoaded(true)
+        }
+    })
+
+    return (
+        <mesh
+            ref={chickenModel}
+            dispose={null}
+            geometry={scene.children[0].geometry}
+            position={[0, 0.5, 1]}
+            scale={[1, 1, 1]}
+            rotation={[0, 0, 0]}>
+            <meshPhysicalMaterial
+                attach="material"
+                roughness={0.1}
+                metalness={1.0}
+                transmission={0.0}
+                reflectivity={1.0}
+                thickness={1.0}
+                clearcoat={0.2}
+                clearcoatRoughness={0.0}
+                ior={2.5}
+                color={0xffffff}
+                flatShading={false}
+                transparent={false}
+                envMapIntensity={3.5}
+                // opacity={0.0}
+            />
+        </mesh>
+    )
+}
 
 const AboutChicken = ({ chickenModel, setModelLoaded }) => {
     return (
@@ -17,13 +55,16 @@ const AboutChicken = ({ chickenModel, setModelLoaded }) => {
                     <Canvas
                         dpr={[1, 2]}
                         camera={{ position: [0, 0, 9.5], fov: 45 }}
-                        onCreated={(state) => state.gl.setClearColor(0x171717, 1.0)}>
+                        onCreated={(state) => state.gl.setClearColor(0x171717, 0.0)}>
                         <Suspense fallback={null}>
                             <spotLight position={[-2, 7, 5]} lookAt={[0, 0, 0]} intensity={5} color={0xffffff} />
                             <pointLight position={[-2, 7, 3]} intensity={3} color={0xffffff} />
                             <ChickenModel chickenModel={chickenModel} setModelLoaded={setModelLoaded} />
-                            <Environment preset="forest" />
-                            {/* <Environment files={[hdri1, hdri2, hdri3, hdri4, hdri5, hdri6]} preset={null} /> */}
+                            {/* <Environment preset="forest" /> */}
+                            <Environment
+                                files={[hdriBlack, hdriBlack, hdriBlack, hdriBlack, hdriBlack, hdriNew5]}
+                                preset={null}
+                            />
                         </Suspense>
                     </Canvas>
                 </div>
@@ -59,5 +100,7 @@ const AboutChicken = ({ chickenModel, setModelLoaded }) => {
         </div>
     )
 }
+
+useGLTF.preload(model)
 
 export default AboutChicken

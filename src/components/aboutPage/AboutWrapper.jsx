@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState } from 'react'
+import { useCallback, useLayoutEffect, useRef, useState } from 'react'
 import About1 from './About1'
 import About2 from './About2'
 import About3 from './About3'
@@ -22,309 +22,313 @@ gsap.registerPlugin(ScrollTrigger, MotionPathPlugin)
 
 const AboutWrapper = () => {
     const [modelLoaded, setModelLoaded] = useState(false)
+    const [loadVisible, setLoadVisible] = useState(true)
     const scrollRef = useRef()
-    const chickenModel = useRef()
+    const chickenModel = useRef(null)
+
+    // const chickenModel = useCallback((node) => {
+    //     if (node !== null) {
+    //         return node
+    //     }
+    // }, [])
 
     useLayoutEffect(() => {
-        const gCtx = gsap.context((self) => {
-            const galleryItems = gsap.utils.toArray('.aboutGallery__item')
-            const teamNames = gsap.utils.toArray('.aboutSlide__team')
+        setLoadVisible(true)
+        let gCtx
+        let timeout = window.setTimeout(() => {
+            gCtx = gsap.context((self) => {
+                const galleryItems = gsap.utils.toArray('.aboutGallery__item')
+                const teamNames = gsap.utils.toArray('.aboutSlide__team')
 
-            gsap.set(galleryItems, { scale: 0 })
-            gsap.set('.chickenTwoCircles', { autoAlpha: 0 })
-            gsap.set('.aboutChicken__3DModel', { autoAlpha: 0 })
-            gsap.set(scrollRef.current, { pointerEvents: 'none', autoAlpha: 0 })
-            // gsap.set('[data-move-sanskrit]', { transformOrigin: 'top' })
-            // gsap.set('.chickenHeart', { autoAlpha: 0 })
-            // gsap.set('.chickenDevi', { autoAlpha: 0 })
-            // gsap.set('.chickenChicken', { autoAlpha: 0 })
+                gsap.set(galleryItems, { scale: 0, transformOrigin: 'top' })
+                gsap.set('.chickenTwoCircles', { autoAlpha: 0 })
+                gsap.set('.aboutChicken__3DModel', { autoAlpha: 0 })
+                gsap.set(scrollRef.current, { pointerEvents: 'none', autoAlpha: 0 })
+                gsap.set('.aboutSlide__discount_text', { transformOrigin: 'center' })
+                gsap.set('.aboutSlide__discount_text', { transformOrigin: 'center' })
+                // gsap.set('[data-move-sanskrit]', { transformOrigin: 'top' })
 
-            if (modelLoaded) {
-                gsap.to(scrollRef.current, { autoAlpha: 1 }).then(() =>
-                    gsap.set(scrollRef.current, { pointerEvents: 'auto' })
-                )
-            }
+                const twoCirclesPath = self.selector('.chickenTwoCircles')[0]
+                const twoCirclesD = twoCirclesPath.getAttribute('d')
+                const chickenHeartD = self.selector('.chickenHeart')[0].getAttribute('d')
+                const chickenDeviD = self.selector('.chickenDevi')[0].getAttribute('d')
+                const chickenChickenD = self.selector('.chickenChicken')[0].getAttribute('d')
 
-            gsap.defaults({ ease: 'none' })
+                const morphValHeart = {
+                    a: 0,
+                }
+                const morphValDevi = {
+                    a: 0,
+                }
+                const morphValChicken = {
+                    a: 0,
+                }
 
-            const twoCirclesPath = self.selector('.chickenTwoCircles')[0]
-            const twoCirclesD = twoCirclesPath.getAttribute('d')
-            const chickenHeartD = self.selector('.chickenHeart')[0].getAttribute('d')
-            const chickenDeviD = self.selector('.chickenDevi')[0].getAttribute('d')
-            const chickenChickenD = self.selector('.chickenChicken')[0].getAttribute('d')
-
-            const morphValHeart = {
-                a: 0,
-            }
-            const morphValDevi = {
-                a: 0,
-            }
-            const morphValChicken = {
-                a: 0,
-            }
-
-            const morphToHeart = interpolate(twoCirclesD, chickenHeartD, {
-                maxSegmentLength: 3,
-            })
-            const morphToDevi = interpolate(chickenHeartD, chickenDeviD, {
-                maxSegmentLength: 3,
-            })
-            const morphToChicken = interpolate(chickenDeviD, chickenChickenD, {
-                maxSegmentLength: 3,
-            })
-
-            const scrollTween = gsap.to(scrollRef.current, {
-                x: -(scrollRef.current.offsetWidth - window.innerWidth),
-                scrollTrigger: {
-                    trigger: scrollRef.current,
-                    pin: true,
-                    scrub: 1,
-                    end: '+=6000',
-                    // markers: true,
-                },
-            })
-
-            gsap.timeline({
-                scrollTrigger: {
-                    trigger: '.aboutGalleryWrapper',
-                    containerAnimation: scrollTween,
-                    start: 'left left',
-                    end: `left+=${window.innerWidth * 4.5} left`,
-                    scrub: true,
-                    // markers: true,
-                },
-            })
-                .to('.aboutGalleryWrapper', { translateX: window.innerWidth * 4.5 })
-                .to('.aboutStars__container', { translateX: window.innerWidth * 4.5 }, 0)
-
-            gsap.timeline({
-                scrollTrigger: {
-                    trigger: '.aboutSlide__vacancy',
-                    containerAnimation: scrollTween,
-                    start: 'left-=100% center',
-                    end: (self) => `right+=${self.trigger.offsetWidth * 1.8} center`,
-                    scrub: true,
-                    // markers: true,
-                },
-            })
-                .to('.aboutSlide__vacancy', {
-                    x: (index, element) => element.offsetWidth * 1.8,
+                const morphToHeart = interpolate(twoCirclesD, chickenHeartD, {
+                    maxSegmentLength: 3,
                 })
-                .to('.aboutSlide__vacancy', {
-                    autoAlpha: 0,
+                const morphToDevi = interpolate(chickenHeartD, chickenDeviD, {
+                    maxSegmentLength: 3,
+                })
+                const morphToChicken = interpolate(chickenDeviD, chickenChickenD, {
+                    maxSegmentLength: 3,
                 })
 
-            teamNames.forEach((item, i) => {
-                const isLast = i === teamNames.length - 1
-                gsap.timeline({
-                    scrollTrigger: {
-                        trigger: item,
-                        containerAnimation: scrollTween,
-                        start: 'left-=100% center',
-                        end: `right+=${isLast ? item.offsetWidth * 1.6 : 0} center`,
-                        scrub: true,
-                        // markers: true,
-                    },
-                })
-                    .to(item, { x: isLast ? item.offsetWidth * 1.6 : item.offsetWidth * 2 })
-                    .to(
-                        item,
-                        {
-                            autoAlpha: 0,
-                        },
-                        isLast ? 'label' : 0
+                if (modelLoaded) {
+                    // console.clear()
+                    // console.log(chickenModel?.current)
+                    gsap.to('.aboutLoad', { autoAlpha: 0 }).then(() => {
+                        setLoadVisible(false)
+                    })
+                    gsap.to(scrollRef.current, { autoAlpha: 1 }).then(() =>
+                        gsap.set(scrollRef.current, { pointerEvents: 'auto' })
                     )
-            })
 
-            galleryItems.forEach((item, i) => {
-                const isLast = i === galleryItems.length - 1
-                const tl = gsap.timeline({
-                    defaults: { ease: 'none' },
-                    scrollTrigger: {
-                        trigger: '.aboutGallery',
-                        containerAnimation: scrollTween,
-                        start: `center+=${window.innerWidth * i + window.innerWidth * 0.25} center`,
-                        end: `center+=${window.innerWidth * (i + 1) + window.innerWidth} center`,
-                        scrub: true,
-                    },
-                })
-                tl.to(item, {
-                    scale: 1,
-                    motionPath: {
-                        path: '#movePath',
-                        align: '#movePath',
-                        alignOrigin: isLast ? [0.25, 1] : [0, 1],
-                        start: 1,
-                        end: isLast ? 0.47 : 0.5,
-                    },
-                })
-                if (isLast) {
-                    tl.to(item, {
+                    gsap.defaults({ ease: 'none' })
+
+                    const scrollTween = gsap.to(scrollRef.current, {
+                        x: -(scrollRef.current.offsetWidth - window.innerWidth),
+                        scrollTrigger: {
+                            trigger: scrollRef.current,
+                            pin: true,
+                            scrub: 1,
+                            end: '+=6000',
+                            // markers: true,
+                        },
+                    })
+
+                    gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.aboutGalleryWrapper',
+                            containerAnimation: scrollTween,
+                            start: 'left left',
+                            end: `left+=${window.innerWidth * 4.5} left`,
+                            scrub: true,
+                            // markers: true,
+                        },
+                    })
+                        .to('.aboutGalleryWrapper', { translateX: window.innerWidth * 4.5 })
+                        .to('.aboutStars__container', { translateX: window.innerWidth * 4.5 }, 0)
+
+                    gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.aboutSlide__vacancy',
+                            containerAnimation: scrollTween,
+                            start: 'left-=100% center',
+                            end: (self) => `right+=${self.trigger.offsetWidth * 1.8} center`,
+                            scrub: true,
+                            // markers: true,
+                        },
+                    })
+                        .to('.aboutSlide__vacancy', {
+                            x: (index, element) => element.offsetWidth * 1.8,
+                        })
+                        .to('.aboutSlide__vacancy', {
+                            autoAlpha: 0,
+                        })
+
+                    teamNames.forEach((item, i) => {
+                        const isLast = i === teamNames.length - 1
+                        gsap.timeline({
+                            scrollTrigger: {
+                                trigger: item,
+                                containerAnimation: scrollTween,
+                                start: 'left-=100% center',
+                                end: `right+=${isLast ? item.offsetWidth * 1.6 : 0} center`,
+                                scrub: true,
+                                // markers: true,
+                            },
+                        })
+                            .to(item, { x: isLast ? item.offsetWidth * 1.6 : item.offsetWidth * 2 })
+                            .to(
+                                item,
+                                {
+                                    autoAlpha: 0,
+                                },
+                                isLast ? 'label' : 0
+                            )
+                    })
+
+                    galleryItems.forEach((item, i) => {
+                        const isLast = i === galleryItems.length - 1
+                        const tl = gsap.timeline({
+                            defaults: { ease: 'none' },
+                            scrollTrigger: {
+                                trigger: '.aboutGallery',
+                                containerAnimation: scrollTween,
+                                start: `center+=${window.innerWidth * i + window.innerWidth * 0.25} center`,
+                                end: `center+=${window.innerWidth * (i + 1) + window.innerWidth} center`,
+                                scrub: true,
+                            },
+                        })
+                        tl.to(item, {
+                            scale: 1,
+                            motionPath: {
+                                path: '#movePath',
+                                align: '#movePath',
+                                alignOrigin: isLast ? [0.5, 1] : [0.5, 1],
+                                start: 0,
+                                end: isLast ? 0.5 : 0.5,
+                            },
+                        })
+                        if (isLast) {
+                            tl.to(item, {
+                                autoAlpha: 0,
+                            })
+                        } else {
+                            tl.to(item, {
+                                scale: 0,
+                                motionPath: {
+                                    path: '#movePath',
+                                    align: '#movePath',
+                                    alignOrigin: [0.5, 1],
+                                    start: 0.5,
+                                    end: 1,
+                                },
+                            })
+                        }
+                    })
+
+                    gsap.to('.aboutSlide__discount_text', {
+                        rotate: 720,
+                        scrollTrigger: {
+                            trigger: '.aboutSlide7',
+                            containerAnimation: scrollTween,
+                            start: 'left right',
+                            end: `right left`,
+                            scrub: true,
+                            // markers: true,
+                        },
+                    })
+
+                    gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.aboutChicken__wrapper',
+                            containerAnimation: scrollTween,
+                            start: 'left left',
+                            end: `left+=${window.innerWidth * 3} right`,
+                            scrub: true,
+                        },
+                    }).to('[data-move-sanskrit]', {
+                        x: '200%',
                         autoAlpha: 0,
                     })
-                } else {
-                    tl.to(item, {
-                        scale: 0,
-                        motionPath: {
-                            path: '#movePath',
-                            align: '#movePath',
-                            alignOrigin: [0, 1],
-                            start: 0.5,
-                            end: 0,
+
+                    gsap.to('.aboutChicken__wrapper', {
+                        x: '400vw',
+                        scrollTrigger: {
+                            trigger: '.aboutChicken__wrapper',
+                            containerAnimation: scrollTween,
+                            start: 'left left',
+                            end: `left+=${window.innerWidth * 5} right`,
+                            scrub: true,
+                            // markers: true,
                         },
                     })
+                    gsap.to('.aboutSlide7', {
+                        x: '100vw',
+                        scrollTrigger: {
+                            trigger: '.aboutSlide7',
+                            containerAnimation: scrollTween,
+                            start: 'left left',
+                            end: `right left`,
+                            scrub: true,
+                            // markers: true,
+                        },
+                    })
+                    const chickenTl = gsap.timeline({
+                        scrollTrigger: {
+                            trigger: '.aboutChicken__wrapper',
+                            containerAnimation: scrollTween,
+                            start: 'left left',
+                            end: `left+=${window.innerWidth * 4.5} right`,
+                            scrub: true,
+                            // markers: true,
+                        },
+                    })
+
+                    chickenTl.to(
+                        '.chickenCircle__left',
+                        {
+                            attr: { cx: 128 },
+                        },
+                        'start'
+                    )
+                    chickenTl.to(
+                        '.chickenCircle__right',
+                        {
+                            attr: { cx: 472 },
+                        },
+                        'start'
+                    )
+                    chickenTl.to(
+                        '.chickenCircle__left',
+                        {
+                            attr: { cx: 226 },
+                        },
+                        'second'
+                    )
+                    chickenTl
+                        .to(
+                            '.chickenCircle__right',
+                            {
+                                attr: { cx: 374 },
+                            },
+                            'second'
+                        )
+                        .set('.chickenTwoCircles', { autoAlpha: 1 })
+                        .set(['.chickenCircle__right', '.chickenCircle__left'], { autoAlpha: 0 })
+
+                    chickenTl.to(morphValHeart, {
+                        a: 1,
+                        onUpdate: () => {
+                            twoCirclesPath.setAttribute('d', morphToHeart(morphValHeart.a))
+                        },
+                    })
+                    chickenTl.to(morphValDevi, {
+                        a: 1,
+                        onUpdate: () => {
+                            twoCirclesPath.setAttribute('d', morphToDevi(morphValDevi.a))
+                        },
+                    })
+                    chickenTl.to(morphValChicken, {
+                        a: 1,
+                        onUpdate: () => {
+                            twoCirclesPath.setAttribute('d', morphToChicken(morphValChicken.a))
+                        },
+                    })
+                    chickenTl.to(
+                        '.aboutChicken__svg',
+                        {
+                            rotateY: 360,
+                            autoAlpha: 0,
+                        },
+                        '3d'
+                    )
+                    chickenTl.to('.aboutChicken__3DModel', { autoAlpha: 1 }, '3d')
+                    chickenTl.to(
+                        chickenModel?.current.rotation,
+                        {
+                            y: Math.PI * 4,
+                        },
+                        '3d'
+                    )
+                    chickenTl.to(chickenModel?.current.rotation, {
+                        y: Math.PI * 4 + Math.PI,
+                    })
                 }
-            })
-
-            gsap.to('.aboutChicken__wrapper', {
-                x: '200vw',
-                scrollTrigger: {
-                    trigger: '.aboutChicken__wrapper',
-                    containerAnimation: scrollTween,
-                    start: 'left left',
-                    end: `left+=${window.innerWidth * 3} right`,
-                    scrub: true,
-                    // markers: true,
-                },
-            })
-            gsap.to('.aboutSlide__discount_text', {
-                rotate: 720,
-                scrollTrigger: {
-                    trigger: '.aboutSlide7',
-                    containerAnimation: scrollTween,
-                    start: 'left right',
-                    end: `right left`,
-                    scrub: true,
-                    // markers: true,
-                },
-            })
-
-            // gsap.to('[data-move-sanskrit]', {
-            //     x: '150%',
-            //     autoAlpha: 0,
-            //     scale: 2,
-            //     scrollTrigger: {
-            //         trigger: '.aboutChicken__wrapper',
-            //         containerAnimation: scrollTween,
-            //         start: 'left left',
-            //         end: `left+=${window.innerWidth * 2} right`,
-            //         scrub: true,
-            //     },
-            // })
-
-            gsap.to('.aboutChicken__wrapper', {
-                x: '200vw',
-                scrollTrigger: {
-                    trigger: '.aboutChicken__wrapper',
-                    containerAnimation: scrollTween,
-                    start: 'left left',
-                    end: `left+=${window.innerWidth * 3} right`,
-                    scrub: true,
-                    // markers: true,
-                },
-            })
-            const chickenTl = gsap.timeline({
-                scrollTrigger: {
-                    trigger: '.aboutChicken__wrapper',
-                    containerAnimation: scrollTween,
-                    start: 'left left',
-                    end: `left+=${window.innerWidth * 3.5} right`,
-                    scrub: true,
-                    // markers: true,
-                },
-            })
-
-            // chickenTl.to(
-            //     '.aboutChicken__wrapper',
-            //     {
-            //         x: '200vw',
-            //     },
-            //     'start'
-            // )
-
-            chickenTl.to(
-                '.chickenCircle__left',
-                {
-                    attr: { cx: 128 },
-                },
-                'start'
-            )
-            chickenTl.to(
-                '.chickenCircle__right',
-                {
-                    attr: { cx: 472 },
-                },
-                'start'
-            )
-            chickenTl.to(
-                '.chickenCircle__left',
-                {
-                    attr: { cx: 226 },
-                },
-                'second'
-            )
-            chickenTl
-                .to(
-                    '.chickenCircle__right',
-                    {
-                        attr: { cx: 374 },
-                    },
-                    'second'
-                )
-                .set('.chickenTwoCircles', { autoAlpha: 1 })
-                .set(['.chickenCircle__right', '.chickenCircle__left'], { autoAlpha: 0 })
-
-            chickenTl.to(morphValHeart, {
-                a: 1,
-                onUpdate: () => {
-                    twoCirclesPath.setAttribute('d', morphToHeart(morphValHeart.a))
-                },
-            })
-            chickenTl.to(morphValDevi, {
-                a: 1,
-                onUpdate: () => {
-                    twoCirclesPath.setAttribute('d', morphToDevi(morphValDevi.a))
-                },
-            })
-            chickenTl.to(morphValChicken, {
-                a: 1,
-                onUpdate: () => {
-                    twoCirclesPath.setAttribute('d', morphToChicken(morphValChicken.a))
-                },
-            })
-            // .set('.aboutChicken__3DModel', { autoAlpha: 1 })
-            chickenTl.to(
-                '.aboutChicken__svg',
-                {
-                    rotateY: 360,
-                    autoAlpha: 0,
-                },
-                '3d'
-            )
-            if (modelLoaded) {
-                console.clear()
-                console.log(chickenModel.current)
-                chickenTl.to('.aboutChicken__3DModel', { autoAlpha: 1 }, '3d')
-                chickenTl.to(
-                    chickenModel.current?.rotation,
-                    {
-                        y: Math.PI * 4,
-                    },
-                    '3d'
-                )
-                chickenTl.to(chickenModel.current?.rotation, {
-                    y: Math.PI * 4 + Math.PI * 2,
-                })
-            }
-        }, scrollRef.current)
+            }, scrollRef.current)
+        }, 100)
 
         return () => {
             if (gCtx) gCtx.revert()
+            if (timeout) window.clearTimeout(timeout)
         }
     }, [modelLoaded])
 
     return (
         <div className="aboutWrapper">
+            {loadVisible && <div className="aboutLoad"></div>}
             <div ref={scrollRef} className="aboutContainer">
                 <Noise />
                 <div className="aboutGalleryWrapper">
@@ -352,6 +356,17 @@ const AboutWrapper = () => {
                                 </g>
                             </svg>
                         </div>
+                        <svg
+                            data-tragectory-path
+                            xmlns="http://www.w3.org/2000/svg"
+                            stroke="none"
+                            fill="none"
+                            viewBox="0 0 210.93 439.91">
+                            <path
+                                id="movePath"
+                                d="M141.47.12l67.44,269.76A50.8,50.8,0,0,1,205.06,305L151.88,411.31c-18.9,37.81-73,37.37-91.31-.74L5.51,295.86a50.87,50.87,0,0,1-3.4-34.71L69.47.12"
+                            />
+                        </svg>
                         {/* Path leaf */}
                         {/* <svg
                             data-tragectory-path
@@ -367,7 +382,7 @@ const AboutWrapper = () => {
                             />
                         </svg> */}
                         {/* Path round */}
-                        <svg
+                        {/* <svg
                             data-tragectory-path
                             xmlns="http://www.w3.org/2000/svg"
                             stroke="none"
@@ -377,7 +392,7 @@ const AboutWrapper = () => {
                                 id="movePath"
                                 d="M470.66,12.46c-42.17-42.18-178.94,26.2-305.47,152.73S-29.71,428.48,12.46,470.66,347.58,441.54,474.12,315,512.84,54.63,470.66,12.46Z"
                             />
-                        </svg>
+                        </svg> */}
                         {/* <svg
                             data-tragectory-path
                             xmlns="http://www.w3.org/2000/svg"

@@ -2,7 +2,7 @@ const About7 = () => {
     return (
         <section className="aboutSlide aboutSlide7">
             <div className="aboutSlide7__top">
-                <div className="aboutSlide__features z-10">
+                <div className="aboutSlide__features z-up">
                     <div className="aboutSlide__feature">
                         <p className="aboutSlide__feature_title">Подход</p>
                         <p className="aboutSlide__feature_text">
@@ -77,13 +77,13 @@ const About7 = () => {
                 </div>
             </div>
             <div className="aboutSlide7__bottom">
-                <div className="aboutSlide__sanskrit aboutSlide7__disclaimer z-10">
+                <div className="aboutSlide__sanskrit aboutSlide7__disclaimer z-up">
                     <p>
                         Стороннее преобразование бренда способно исказить изначальную идею. Мы предоставляем
                         гарантированную поддержку реализованного проекта.
                     </p>
                 </div>
-                <div className="aboutSlide__title aboutSlide7__title z-10">
+                <div className="aboutSlide__title aboutSlide7__title z-up">
                     <h2>
                         Form is emptiness,
                         <br />

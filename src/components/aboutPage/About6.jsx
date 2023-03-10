@@ -3,7 +3,7 @@ const About6 = () => {
         <>
             <section className="aboutSlide aboutSlide6">
                 <div className="aboutSlide6__top">
-                    <div className="aboutSlide__title_small z-10">
+                    <div className="aboutSlide__title_small z-up">
                         <h2>
                             Functionality,
                             <br />
@@ -12,7 +12,7 @@ const About6 = () => {
                             Metaphysics.
                         </h2>
                     </div>
-                    <div data-move-sanskrit className="aboutSlide__sanskrit z-10">
+                    <div data-move-sanskrit className="aboutSlide__sanskrit z-up">
                         <p>
                             Мудра (санскр. मुद्रा, mudrā) — знак.
                             <br />
@@ -27,7 +27,7 @@ const About6 = () => {
                     </div>
                 </div>
                 <div className="aboutSlide6__bottom">
-                    <div className="aboutSlide__features z-10">
+                    <div className="aboutSlide__features z-up">
                         <div className="aboutSlide__feature">
                             <p className="aboutSlide__feature_title">Функциональность</p>
                             <p className="aboutSlide__feature_text">
@@ -52,6 +52,8 @@ const About6 = () => {
                     </div>
                 </div>
             </section>
+            <section className="aboutSlide aboutSlide5 aboutSlide__empty"></section>
+            <section className="aboutSlide aboutSlide5 aboutSlide__empty"></section>
             <section className="aboutSlide aboutSlide5 aboutSlide__empty"></section>
             <section className="aboutSlide aboutSlide5 aboutSlide__empty"></section>
         </>
