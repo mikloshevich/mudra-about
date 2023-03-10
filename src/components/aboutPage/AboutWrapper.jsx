@@ -320,7 +320,7 @@ const AboutWrapper = () => {
                     })
                 }
             }, scrollRef.current)
-        }, 100)
+        }, 500)
 
         return () => {
             if (gCtx) gCtx.revert()
