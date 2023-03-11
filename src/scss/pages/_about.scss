@@ -46,7 +46,7 @@
 
 .aboutGalleryWrapper {
     position: absolute;
-    top: 40px;
+    top: 0px;
     bottom: 40px;
     left: 0;
     width: 100vw;
@@ -55,6 +55,19 @@
     align-items: center;
     justify-content: center;
     z-index: 20;
+    svg[data-tragectory-path] {
+        // outline: 2px solid rgb(49, 128, 225);
+        position: absolute;
+        // bottom: 0;
+        // left: -30%;
+        // max-width: none;
+        width: 600px;
+        height: 600px;
+        width: 100%;
+        height: 100%;
+        // max-height: 700px;
+        // stroke: #b1ff9d;
+    }
 }
 
 .aboutGallery {
@@ -64,7 +77,7 @@
     width: min(33%, 750px);
     position: relative;
     &__item {
-        outline: 1px solid rgb(14, 155, 168);
+        // outline: 1px solid rgb(14, 155, 168);
         position: absolute;
         bottom: 0;
         right: 0;
@@ -92,17 +105,17 @@
         height: 100%;
         max-height: var(--max-height);
     }
-    svg[data-tragectory-path] {
-        // outline: 2px solid rgb(49, 128, 225);
-        position: absolute;
-        bottom: 0;
-        left: -30%;
-        max-width: none;
-        width: 100%;
-        height: 60%;
-        // max-height: 700px;
-        stroke: #b1ff9d;
-    }
+    // svg[data-tragectory-path] {
+    //     outline: 2px solid rgb(49, 128, 225);
+    //     position: absolute;
+    //     // bottom: 0;
+    //     // left: -30%;
+    //     // max-width: none;
+    //     width: 100%;
+    //     height: 60%;
+    //     // max-height: 700px;
+    //     stroke: #b1ff9d;
+    // }
 }
 
 .aboutSlide {
@@ -151,11 +164,17 @@
     &__team_container {
         display: flex;
         flex-direction: column;
+        padding-top: 40px;
     }
     &__team {
-        margin-top: auto;
-        margin-left: auto;
+        position: absolute;
+        top: 40px;
+        // left: 75%;
+        right: 20px;
         min-width: 25%;
+        display: flex;
+        flex-direction: column;
+        // outline: 2px solid rgb(49, 128, 225);
         &_job {
             font-style: normal;
             font-weight: 400;
@@ -176,8 +195,10 @@
         letter-spacing: -0.025em;
         color: #878787;
         margin-left: auto;
-        margin-top: calc(50vh - 70px);
+        margin-top: 45px;
         min-width: 25%;
+        // outline: 2px solid rgb(49, 128, 225);
+
         ul {
             margin-bottom: 27px;
             li::before {
@@ -330,7 +351,7 @@
         // outline: 1px solid yellow;
         position: absolute;
         top: 0;
-        left: 0;
+        left: -50vw;
         height: 100%;
         width: 100vw;
         pointer-events: none;
@@ -348,6 +369,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        // margin-right: auto;
         perspective: 1200px;
         svg {
             width: 100%;

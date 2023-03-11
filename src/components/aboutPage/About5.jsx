@@ -2,6 +2,9 @@ const About5 = () => {
     return (
         <>
             <section className="aboutSlide aboutSlide5 aboutSlide__team_container">
+                {/* <div className="aboutSlide__team z-up">
+                    <p className="aboutSlide__team_name">Ты</p>
+                </div> */}
                 <div className="aboutSlide__vacancy z-up">
                     <p className="aboutSlide__vacancy_title">Вакансии:</p>
                     <ul>
@@ -14,11 +17,7 @@ const About5 = () => {
                         <a href="#">hr@mudra-studio.com</a>
                     </div>
                 </div>
-                <div className="aboutSlide__team z-up">
-                    <p className="aboutSlide__team_name">Ты</p>
-                </div>
             </section>
-            <section className="aboutSlide aboutSlide5 aboutSlide__empty"></section>
         </>
     )
 }

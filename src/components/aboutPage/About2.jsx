@@ -1,10 +1,10 @@
 const About2 = () => {
     return (
         <section className="aboutSlide aboutSlide2 aboutSlide__team_container">
-            <div className="aboutSlide__team z-up">
+            {/* <div className="aboutSlide__team z-up">
                 <p className="aboutSlide__team_job">CEO</p>
                 <p className="aboutSlide__team_name">Марина Мудролюбова</p>
-            </div>
+            </div> */}
         </section>
     )
 }

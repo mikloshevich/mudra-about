@@ -34,11 +34,14 @@ const AboutWrapper = () => {
 
     useLayoutEffect(() => {
         setLoadVisible(true)
+        console.clear()
         let gCtx
         let timeout = window.setTimeout(() => {
             gCtx = gsap.context((self) => {
                 const galleryItems = gsap.utils.toArray('.aboutGallery__item')
                 const teamNames = gsap.utils.toArray('.aboutSlide__team')
+
+                gsap.set(teamNames, { autoAlpha: 0, scale: 0 })
 
                 gsap.set(galleryItems, { scale: 0, transformOrigin: 'top' })
                 gsap.set('.chickenTwoCircles', { autoAlpha: 0 })
@@ -53,6 +56,8 @@ const AboutWrapper = () => {
                 const chickenHeartD = self.selector('.chickenHeart')[0].getAttribute('d')
                 const chickenDeviD = self.selector('.chickenDevi')[0].getAttribute('d')
                 const chickenChickenD = self.selector('.chickenChicken')[0].getAttribute('d')
+
+                gsap.set(twoCirclesPath, { transformOrigin: 'center' })
 
                 const morphValHeart = {
                     a: 0,
@@ -110,47 +115,52 @@ const AboutWrapper = () => {
                         .to('.aboutGalleryWrapper', { translateX: window.innerWidth * 4.5 })
                         .to('.aboutStars__container', { translateX: window.innerWidth * 4.5 }, 0)
 
+                    // Vacancy Animation:
+                    gsap.set('.aboutSlide__vacancy', { autoAlpha: 0 })
                     gsap.timeline({
                         scrollTrigger: {
-                            trigger: '.aboutSlide__vacancy',
+                            trigger: '.aboutSlide5',
                             containerAnimation: scrollTween,
-                            start: 'left-=100% center',
-                            end: (self) => `right+=${self.trigger.offsetWidth * 1.8} center`,
+                            start: 'left left',
+                            end: (self) => `right left`,
                             scrub: true,
                             // markers: true,
                         },
                     })
                         .to('.aboutSlide__vacancy', {
-                            x: (index, element) => element.offsetWidth * 1.8,
+                            autoAlpha: 1,
+                            x: (index, element) => element.offsetWidth * 2,
                         })
                         .to('.aboutSlide__vacancy', {
                             autoAlpha: 0,
                         })
 
-                    teamNames.forEach((item, i) => {
-                        const isLast = i === teamNames.length - 1
-                        gsap.timeline({
-                            scrollTrigger: {
-                                trigger: item,
-                                containerAnimation: scrollTween,
-                                start: 'left-=100% center',
-                                end: `right+=${isLast ? item.offsetWidth * 1.6 : 0} center`,
-                                scrub: true,
-                                // markers: true,
-                            },
-                        })
-                            .to(item, { x: isLast ? item.offsetWidth * 1.6 : item.offsetWidth * 2 })
-                            .to(
-                                item,
-                                {
-                                    autoAlpha: 0,
-                                },
-                                isLast ? 'label' : 0
-                            )
-                    })
+                    // teamNames.forEach((item, i) => {
+                    //     const isLast = i === teamNames.length - 1
+                    //     gsap.timeline({
+                    //         scrollTrigger: {
+                    //             trigger: '.aboutGallery',
+                    //             containerAnimation: scrollTween,
+                    //             start: `center+=${window.innerWidth * i + window.innerWidth * 0.25} center`,
+                    //             end: `center+=${window.innerWidth * (i + 1) + window.innerWidth * 0.4} center`,
+                    //             scrub: true,
+                    //         },
+                    //     })
+                    //         .to(item, { autoAlpha: 1 })
+                    //         .to(item, {
+                    //             autoAlpha: 0,
+                    //         })
+                    // })
 
+                    // ============ Path Move Animation =================
                     galleryItems.forEach((item, i) => {
                         const isLast = i === galleryItems.length - 1
+                        let pathId = '#movePathLeft'
+                        if (i % 2 === 0) {
+                            pathId = '#movePathLeft'
+                        } else {
+                            pathId = '#movePathRight'
+                        }
                         const tl = gsap.timeline({
                             defaults: { ease: 'none' },
                             scrollTrigger: {
@@ -161,32 +171,63 @@ const AboutWrapper = () => {
                                 scrub: true,
                             },
                         })
-                        tl.to(item, {
-                            scale: 1,
-                            motionPath: {
-                                path: '#movePath',
-                                align: '#movePath',
-                                alignOrigin: isLast ? [0.5, 1] : [0.5, 1],
-                                start: 0,
-                                end: isLast ? 0.5 : 0.5,
+                        tl.to(
+                            item,
+                            {
+                                scale: 1,
+                                motionPath: {
+                                    path: pathId,
+                                    align: pathId,
+                                    alignOrigin: [0.5, 1],
+                                    start: 0,
+                                    end: 0.5,
+                                },
                             },
+                            'begin'
+                        )
+                        tl.to(
+                            teamNames[i],
+                            {
+                                autoAlpha: 1,
+                                scale: 1,
+                            },
+                            'begin'
+                        )
+                        tl.to(teamNames[i], {
+                            autoAlpha: 0,
                         })
                         if (isLast) {
-                            tl.to(item, {
-                                autoAlpha: 0,
-                            })
-                        } else {
-                            tl.to(item, {
-                                scale: 0,
-                                motionPath: {
-                                    path: '#movePath',
-                                    align: '#movePath',
-                                    alignOrigin: [0.5, 1],
-                                    start: 0.5,
-                                    end: 1,
+                            tl.to(
+                                item,
+                                {
+                                    autoAlpha: 0,
                                 },
-                            })
+                                'end'
+                            )
+                        } else {
+                            tl.to(
+                                item,
+                                {
+                                    autoAlpha: 0,
+                                    scale: 2,
+                                    motionPath: {
+                                        path: pathId,
+                                        align: pathId,
+                                        alignOrigin: [0.5, 1],
+                                        start: 0.5,
+                                        end: 1,
+                                    },
+                                },
+                                'end'
+                            )
                         }
+                        // tl.to(
+                        //     teamNames[i],
+                        //     {
+                        //         autoAlpha: 0,
+                        //     },
+                        //     'end'
+                        // )
                     })
 
                     gsap.to('.aboutSlide__discount_text', {
@@ -205,21 +246,34 @@ const AboutWrapper = () => {
                             end: `left+=${window.innerWidth * 3} right`,
                             scrub: true,
                         },
-                    }).to('[data-move-sanskrit]', {
-                        x: '200%',
-                        autoAlpha: 0,
                     })
+                        .to(
+                            '[data-move-sanskrit]',
+                            {
+                                x: '200%',
+                                autoAlpha: 0,
+                            },
+                            'time'
+                        )
+                        .to(
+                            '.aboutSlide6__bottom .aboutSlide__features',
+                            {
+                                x: '200%',
+                                autoAlpha: 0,
+                            },
+                            'time'
+                        )
 
                     // ================ Chicken Animation =====================
 
                     // Chicken:
                     gsap.to('.aboutChicken__wrapper', {
-                        x: '600vw',
+                        x: '650vw',
                         scrollTrigger: {
                             trigger: '.aboutChicken__wrapper',
                             containerAnimation: scrollTween,
                             start: 'left left',
-                            end: `left+=${window.innerWidth * 7} right`,
+                            end: `left+=${window.innerWidth * 7.5} right`,
                             scrub: true,
                             // markers: true,
                         },
@@ -246,26 +300,39 @@ const AboutWrapper = () => {
                         },
                     })
 
+                    gsap.set(['.chickenCircle__left', '.chickenCircle__right'], {
+                        scale: 0,
+                        autoAlpha: 0,
+                        transformOrigin: 'center',
+                    })
+                    chickenTl.to(
+                        ['.chickenCircle__left', '.chickenCircle__right'],
+                        {
+                            scale: 1,
+                            autoAlpha: 1,
+                        },
+                        'start'
+                    )
                     chickenTl.to(
                         '.chickenCircle__left',
                         {
                             attr: { cx: 128 },
                         },
-                        'start'
+                        'second'
                     )
                     chickenTl.to(
                         '.chickenCircle__right',
                         {
                             attr: { cx: 472 },
                         },
-                        'start'
+                        'second'
                     )
                     chickenTl.to(
                         '.chickenCircle__left',
                         {
                             attr: { cx: 226 },
                         },
-                        'second'
+                        'third'
                     )
                     chickenTl
                         .to(
@@ -273,7 +340,7 @@ const AboutWrapper = () => {
                             {
                                 attr: { cx: 374 },
                             },
-                            'second'
+                            'third'
                         )
                         .set('.chickenTwoCircles', { autoAlpha: 1 })
                         .set(['.chickenCircle__right', '.chickenCircle__left'], { autoAlpha: 0 })
@@ -284,11 +351,15 @@ const AboutWrapper = () => {
                             twoCirclesPath.setAttribute('d', morphToHeart(morphValHeart.a))
                         },
                     })
+
                     chickenTl.to(morphValDevi, {
                         a: 1,
                         onUpdate: () => {
                             twoCirclesPath.setAttribute('d', morphToDevi(morphValDevi.a))
                         },
+                    })
+                    chickenTl.to(twoCirclesPath, {
+                        rotate: 180,
                     })
                     chickenTl.to(morphValChicken, {
                         a: 1,
@@ -299,7 +370,7 @@ const AboutWrapper = () => {
                     chickenTl.to(
                         '.aboutChicken__svg',
                         {
-                            rotateY: 360,
+                            rotateY: 540,
                             autoAlpha: 0,
                         },
                         '3d'
@@ -334,6 +405,31 @@ const AboutWrapper = () => {
             <div ref={scrollRef} className="aboutContainer">
                 <Noise />
                 <div className="aboutGalleryWrapper">
+                    <svg
+                        data-tragectory-path
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 100 100"
+                        preserveAspectRatio="none"
+                        stroke="none"
+                        fill="none">
+                        <path id="movePathRight" d="M50,25 L75,100 l25,75" />
+                        <path id="movePathLeft" d="M50,25 L25,100 l-25,75" />
+                    </svg>
+                    <div className="aboutSlide__team z-up">
+                        <p className="aboutSlide__team_name">Марина Мудролюбова</p>
+                        <p className="aboutSlide__team_job">CEO</p>
+                    </div>
+                    <div className="aboutSlide__team z-up">
+                        <p className="aboutSlide__team_name">Андрей Мудролюбов</p>
+                        <p className="aboutSlide__team_job">арт-директор</p>
+                    </div>
+                    <div className="aboutSlide__team z-up">
+                        <p className="aboutSlide__team_name">Павел Кац</p>
+                        <p className="aboutSlide__team_job">team lead</p>
+                    </div>
+                    <div className="aboutSlide__team z-up">
+                        <p className="aboutSlide__team_name">Ты</p>
+                    </div>
                     <div className="aboutGallery">
                         <div className="aboutGallery__item">
                             <img src={notMarina} alt="not Marina" />
@@ -358,7 +454,7 @@ const AboutWrapper = () => {
                                 </g>
                             </svg>
                         </div>
-                        <svg
+                        {/* <svg
                             data-tragectory-path
                             xmlns="http://www.w3.org/2000/svg"
                             stroke="none"
@@ -368,7 +464,7 @@ const AboutWrapper = () => {
                                 id="movePath"
                                 d="M141.47.12l67.44,269.76A50.8,50.8,0,0,1,205.06,305L151.88,411.31c-18.9,37.81-73,37.37-91.31-.74L5.51,295.86a50.87,50.87,0,0,1-3.4-34.71L69.47.12"
                             />
-                        </svg>
+                        </svg> */}
                         {/* Path leaf */}
                         {/* <svg
                             data-tragectory-path
@@ -414,6 +510,7 @@ const AboutWrapper = () => {
                 <About3 />
                 <About4 />
                 <About5 />
+                <section className="aboutSlide aboutSlide5 aboutSlide__empty"></section>
                 <div className="aboutChicken__zone">
                     <AboutChicken chickenModel={chickenModel} setModelLoaded={(val) => setModelLoaded(val)} />
                     <About6 />
