@@ -140,6 +140,8 @@
         // }
     }
     &__empty {
+        position: relative;
+        z-index: -1;
         width: var(--empty-width);
     }
     &__title {
@@ -329,7 +331,7 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        z-index: 20;
+        z-index: 31;
     }
 }
 
@@ -354,11 +356,11 @@
         left: -50vw;
         height: 100%;
         width: 100vw;
-        pointer-events: none;
+        pointer-events: auto;
         display: flex;
         align-items: center;
         justify-content: center;
-        z-index: 20;
+        z-index: 30;
     }
     &__container {
         // outline: 1px solid rgb(137, 161, 255);
@@ -388,8 +390,12 @@
         height: 100%;
         max-width: 800px;
         max-height: 800px;
-        // canvas {
-        //     background-image: url('../assets/general/noise.gif');
-        // }
+        z-index: 1000;
+        pointer-events: auto;
+        canvas {
+            z-index: 1000;
+            position: relative;
+            // background-color: #171717;
+        }
     }
 }

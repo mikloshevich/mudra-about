@@ -26,12 +26,6 @@ const AboutWrapper = () => {
     const scrollRef = useRef()
     const chickenModel = useRef(null)
 
-    // const chickenModel = useCallback((node) => {
-    //     if (node !== null) {
-    //         return node
-    //     }
-    // }, [])
-
     useLayoutEffect(() => {
         setLoadVisible(true)
         console.clear()
@@ -41,9 +35,9 @@ const AboutWrapper = () => {
                 const galleryItems = gsap.utils.toArray('.aboutGallery__item')
                 const teamNames = gsap.utils.toArray('.aboutSlide__team')
 
-                gsap.set(teamNames, { autoAlpha: 0, scale: 0 })
+                gsap.set(teamNames, { autoAlpha: 0, scale: 0, transformOrigin: 'left' })
 
-                gsap.set(galleryItems, { scale: 0, transformOrigin: 'top' })
+                gsap.set(galleryItems, { scale: 0, transformOrigin: 'top', autoAlpha: 0 })
                 gsap.set('.chickenTwoCircles', { autoAlpha: 0 })
                 gsap.set('.aboutChicken__3DModel', { autoAlpha: 0 })
                 gsap.set(scrollRef.current, { pointerEvents: 'none', autoAlpha: 0 })
@@ -175,6 +169,7 @@ const AboutWrapper = () => {
                             item,
                             {
                                 scale: 1,
+                                autoAlpha: 1,
                                 motionPath: {
                                     path: pathId,
                                     align: pathId,
@@ -412,8 +407,8 @@ const AboutWrapper = () => {
                         preserveAspectRatio="none"
                         stroke="none"
                         fill="none">
-                        <path id="movePathRight" d="M50,25 L75,100 l25,75" />
-                        <path id="movePathLeft" d="M50,25 L25,100 l-25,75" />
+                        <path id="movePathRight" d="M50,50 L75,100 l25,50" />
+                        <path id="movePathLeft" d="M50,50 L25,100 l-25,50" />
                     </svg>
                     <div className="aboutSlide__team z-up">
                         <p className="aboutSlide__team_name">Марина Мудролюбова</p>
@@ -513,6 +508,7 @@ const AboutWrapper = () => {
                 <section className="aboutSlide aboutSlide5 aboutSlide__empty"></section>
                 <div className="aboutChicken__zone">
                     <AboutChicken chickenModel={chickenModel} setModelLoaded={(val) => setModelLoaded(val)} />
+                    {/* <AboutChicken chickenModel={chickenModel} /> */}
                     <About6 />
                     <About7 />
                 </div>

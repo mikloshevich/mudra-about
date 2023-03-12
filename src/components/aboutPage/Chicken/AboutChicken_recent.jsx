@@ -1,15 +1,18 @@
-import { Suspense, useEffect, useMemo, useRef } from 'react'
-import { Canvas, useFrame } from '@react-three/fiber'
+import { Suspense, useEffect } from 'react'
+import { Canvas, useLoader } from '@react-three/fiber'
 import {
+    MeshRefractionMaterial,
+    MeshReflectorMaterial,
     CubeCamera,
     Environment,
     useGLTF,
-    useFBO,
+    useTexture,
+    useProgress,
     useCubeTexture,
     useEnvironment,
-    OrbitControls,
 } from '@react-three/drei'
-import * as THREE from 'three'
+import { EffectComposer, Bloom, SSAO } from '@react-three/postprocessing'
+import { RGBELoader, CubeTexturePass } from 'three-stdlib'
 import model from '../../../assets/aboutPage/chicken/gltf/chicken3_threejs_smooth2.gltf?url'
 import hdri1 from '../../../assets/aboutPage/chicken/mudra-studio-hdri/hdri1.png'
 import hdri6 from '../../../assets/aboutPage/chicken/mudra-studio-hdri/hdri6.png'
@@ -18,79 +21,24 @@ import hdriNew1 from '../../../assets/aboutPage/chicken/mudra-studio-hdri/hdriNe
 import hdriNew2 from '../../../assets/aboutPage/chicken/mudra-studio-hdri/hdriNew2.png'
 import hdriNew5 from '../../../assets/aboutPage/chicken/mudra-studio-hdri/hdriNew5.png'
 import hdriBlack from '../../../assets/aboutPage/chicken/mudra-studio-hdri/hdriBlack.png'
-import fragmentShader from './glsl/fragmentShader'
-import vertexShader from './glsl/vertexShader'
-import { v4 as uuidv4 } from 'uuid'
+import { BlendFunction, KernelSize } from 'postprocessing'
 
 // https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/shanghai_bund_1k.hdr
 // https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/syferfontein_1d_clear_puresky_1k.hdr
 // https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/circus_arena_1k.hdr
 const ChickenModel = ({ chickenModel, setModelLoaded }) => {
     const { scene } = useGLTF(model)
-    // const texture = useCubeTexture([hdriBlack, hdriBlack, hdriBlack, hdriBlack, hdriBlack, hdriNew5], { path: '' })
-    const texture = useEnvironment({
-        files: 'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/shanghai_bund_1k.hdr',
-    })
+    const texture = useCubeTexture([hdriBlack, hdriBlack, hdriBlack, hdriBlack, hdriBlack, hdriNew5], { path: '' })
+    // const texture = useEnvironment({
+    //     files: 'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/shanghai_bund_1k.hdr',
+    // })
 
-    const mainRenderTarget = useFBO()
-
-    const iorR = useRef({ value: 1.15 })
-    const iorG = useRef({ value: 1.18 })
-    const iorB = useRef({ value: 1.22 })
-
-    const uniforms = useMemo(
-        () => ({
-            uTexture: {
-                value: null,
-            },
-            // uIorR: {
-            //     value: 1.0,
-            // },
-            // uIorG: {
-            //     value: 1.0,
-            // },
-            // uIorB: {
-            //     value: 1.0,
-            // },
-            winResolution: {
-                value: new THREE.Vector2(window.innerWidth, window.innerHeight).multiplyScalar(
-                    Math.min(window.devicePixelRatio, 2)
-                ), // if DPR is 3 the shader glitches 🤷‍♂️
-            },
-        }),
-        []
-    )
-
-    useFrame((state) => {
-        const { gl, scene, camera } = state
-        chickenModel.current.visible = false
-        gl.setRenderTarget(mainRenderTarget)
-        gl.render(scene, camera)
-
-        chickenModel.current.material.uniforms.uTexture.value = mainRenderTarget.texture
-
-        gl.setRenderTarget(null)
-        chickenModel.current.visible = true
-
-        // chickenModel.current.material.uniforms.uIorR.value = iorR.current.value
-        // chickenModel.current.material.uniforms.uIorG.value = iorG.current.value
-        // chickenModel.current.material.uniforms.uIorB.value = iorB.current.value
-    })
-
-    const range = (start, end, step = 1) => {
-        let output = []
-        if (typeof end === 'undefined') {
-            end = start
-            start = 0
-        }
-        for (let i = start; i <= end; i += step) {
-            output.push(i)
-        }
-        return output
-    }
-
-    const columns = range(-6.5, 6.5, 2.5)
-    const rows = range(-6.5, 6.5, 2.5)
+    // useProgress((state) => {
+    //     if (state.progress === 100) {
+    //         setModelLoaded(true)
+    //         console.log('useProgress: loaded')
+    //     }
+    // })
 
     useEffect(() => {
         setModelLoaded(true)
@@ -98,34 +46,35 @@ const ChickenModel = ({ chickenModel, setModelLoaded }) => {
     }, [])
 
     return (
-        <>
-            <color attach="background" args={['#555555']} />
-            <group>
-                {columns.map((col, i) =>
-                    rows.map((row, j) => (
-                        <mesh key={i + j + 1} position={[col, row, -4]}>
-                            <icosahedronGeometry args={[0.4, 8]} />
-                            <meshStandardMaterial color="white" />
-                        </mesh>
-                    ))
-                )}
-            </group>
-            <mesh
-                ref={chickenModel}
-                dispose={null}
-                geometry={scene.children[0].geometry}
-                position={[0, 0.5, 1]}
-                scale={[1, 1, 1]}
-                rotation={[0, 0, 0]}>
-                {/* <icosahedronGeometry args={[2.84, 20]} /> */}
-                <shaderMaterial
-                    key={uuidv4()}
-                    vertexShader={vertexShader}
-                    fragmentShader={fragmentShader}
-                    uniforms={uniforms}
-                />
-            </mesh>
-        </>
+        <CubeCamera resolution={256} frames={1} envMap={texture}>
+            {(texture) => (
+                <mesh
+                    ref={chickenModel}
+                    dispose={null}
+                    geometry={scene.children[0].geometry}
+                    position={[0, 0.5, 1]}
+                    scale={[1, 1, 1]}
+                    rotation={[0, 0, 0]}>
+                    <meshPhysicalMaterial
+                        attach="material"
+                        roughness={0.1}
+                        metalness={1.0}
+                        transmission={0.0}
+                        reflectivity={1.0}
+                        thickness={0.01}
+                        clearcoat={0.0}
+                        clearcoatRoughness={0.0}
+                        ior={1.5}
+                        color={0x888888}
+                        flatShading={true}
+                        transparent={false}
+                        // envMapIntensity={0.5}
+                        // envMap={texture}
+                        // opacity={0.0}
+                    />
+                </mesh>
+            )}
+        </CubeCamera>
     )
 }
 
@@ -136,11 +85,49 @@ const AboutChicken = ({ chickenModel, setModelLoaded }) => {
                 <Canvas
                     dpr={[1, 2]}
                     camera={{ position: [0, 0, 16.8], fov: 45 }}
-                    // onCreated={(state) => state.gl.setClearColor(0x171717, 0.0)}
-                >
+                    onCreated={(state) => state.gl.setClearColor(0x171717, 0.0)}>
                     <Suspense fallback={null}>
                         <group>
-                            <ambientLight intensity={1} />
+                            <ambientLight intensity={3} />
+                            <spotLight position={[5, 1, 0]} lookAt={[0, 0, 0]} intensity={10} color={0xeeeeee} />
+                            <spotLight position={[-5, 1, 0]} lookAt={[0, 0, 0]} intensity={10} color={0xeeeeee} />
+                            <spotLight position={[0, -5, 0]} lookAt={[0, 0, 0]} intensity={10} color={0xeeeeee} />
+                            <spotLight
+                                position={[0, 5, 0]}
+                                lookAt={[0, 0, 0]}
+                                intensity={5}
+                                // penumbra={0.5}
+                                color={0xeb3434}
+                            />
+                            <spotLight
+                                position={[-5, -5, 0]}
+                                lookAt={[0, 0, 0]}
+                                intensity={20}
+                                // penumbra={0.5}
+                                color={0x34a1eb}
+                            />
+                            <spotLight
+                                position={[5, 5, 0]}
+                                lookAt={[0, 0, 0]}
+                                intensity={20}
+                                // penumbra={0.5}
+                                color={0x34a1eb}
+                            />
+                            <spotLight
+                                position={[5, -5, 0]}
+                                lookAt={[0, 0, 0]}
+                                intensity={15}
+                                // penumbra={0.5}
+                                color={0x34eb5c}
+                            />
+                            <spotLight
+                                position={[-5, 5, 0]}
+                                lookAt={[0, 0, 0]}
+                                intensity={15}
+                                // penumbra={0.5}
+                                color={0x34eb5c}
+                            />
+                            <pointLight position={[0, 5, 5]} intensity={3} color={0xffffff} />
                             <ChickenModel chickenModel={chickenModel} setModelLoaded={setModelLoaded} />
                         </group>
                         {/* <Environment preset="forest" /> */}
@@ -149,7 +136,6 @@ const AboutChicken = ({ chickenModel, setModelLoaded }) => {
                                 preset={null}
                             /> */}
                     </Suspense>
-                    <OrbitControls enableZoom={false} />
                 </Canvas>
             </div>
             <div className="aboutChicken__container">
