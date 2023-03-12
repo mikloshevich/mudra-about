@@ -35,12 +35,24 @@ const ChickenModel = ({ chickenModel, setModelLoaded }) => {
 
     const mainRenderTarget = useFBO()
 
-    const { iorR, iorG, iorB } = useControls({
+    const { iorR, iorG, iorB, chromaticAberration, refraction } = useControls({
         ior: folder({
             iorR: { min: 1.0, max: 2.333, step: 0.001, value: 1.15 },
             iorG: { min: 1.0, max: 2.333, step: 0.001, value: 1.18 },
             iorB: { min: 1.0, max: 2.333, step: 0.001, value: 1.22 },
         }),
+        chromaticAberration: {
+            value: 0.5,
+            min: 0,
+            max: 1.5,
+            step: 0.01,
+        },
+        refraction: {
+            value: 0.4,
+            min: 0,
+            max: 1,
+            step: 0.01,
+        },
     })
 
     // const iorR = useRef({ value: 1.15 })
@@ -59,6 +71,12 @@ const ChickenModel = ({ chickenModel, setModelLoaded }) => {
                 value: 1.0,
             },
             uIorB: {
+                value: 1.0,
+            },
+            uRefractPower: {
+                value: 0.2,
+            },
+            uChromaticAberration: {
                 value: 1.0,
             },
             winResolution: {
@@ -84,6 +102,9 @@ const ChickenModel = ({ chickenModel, setModelLoaded }) => {
         chickenModel.current.material.uniforms.uIorR.value = iorR
         chickenModel.current.material.uniforms.uIorG.value = iorG
         chickenModel.current.material.uniforms.uIorB.value = iorB
+
+        chickenModel.current.material.uniforms.uChromaticAberration.value = chromaticAberration
+        chickenModel.current.material.uniforms.uRefractPower.value = refraction
     })
 
     const range = (start, end, step = 1) => {
