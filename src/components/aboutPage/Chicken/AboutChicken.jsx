@@ -10,6 +10,7 @@ import {
     OrbitControls,
 } from '@react-three/drei'
 import * as THREE from 'three'
+import { Leva, folder, useControls } from 'leva'
 import model from '../../../assets/aboutPage/chicken/gltf/chicken3_threejs_smooth2.gltf?url'
 import hdri1 from '../../../assets/aboutPage/chicken/mudra-studio-hdri/hdri1.png'
 import hdri6 from '../../../assets/aboutPage/chicken/mudra-studio-hdri/hdri6.png'
@@ -34,24 +35,32 @@ const ChickenModel = ({ chickenModel, setModelLoaded }) => {
 
     const mainRenderTarget = useFBO()
 
-    const iorR = useRef({ value: 1.15 })
-    const iorG = useRef({ value: 1.18 })
-    const iorB = useRef({ value: 1.22 })
+    const { iorR, iorG, iorB } = useControls({
+        ior: folder({
+            iorR: { min: 1.0, max: 2.333, step: 0.001, value: 1.15 },
+            iorG: { min: 1.0, max: 2.333, step: 0.001, value: 1.18 },
+            iorB: { min: 1.0, max: 2.333, step: 0.001, value: 1.22 },
+        }),
+    })
+
+    // const iorR = useRef({ value: 1.15 })
+    // const iorG = useRef({ value: 1.18 })
+    // const iorB = useRef({ value: 1.22 })
 
     const uniforms = useMemo(
         () => ({
             uTexture: {
                 value: null,
             },
-            // uIorR: {
-            //     value: 1.0,
-            // },
-            // uIorG: {
-            //     value: 1.0,
-            // },
-            // uIorB: {
-            //     value: 1.0,
-            // },
+            uIorR: {
+                value: 1.0,
+            },
+            uIorG: {
+                value: 1.0,
+            },
+            uIorB: {
+                value: 1.0,
+            },
             winResolution: {
                 value: new THREE.Vector2(window.innerWidth, window.innerHeight).multiplyScalar(
                     Math.min(window.devicePixelRatio, 2)
@@ -72,9 +81,9 @@ const ChickenModel = ({ chickenModel, setModelLoaded }) => {
         gl.setRenderTarget(null)
         chickenModel.current.visible = true
 
-        // chickenModel.current.material.uniforms.uIorR.value = iorR.current.value
-        // chickenModel.current.material.uniforms.uIorG.value = iorG.current.value
-        // chickenModel.current.material.uniforms.uIorB.value = iorB.current.value
+        chickenModel.current.material.uniforms.uIorR.value = iorR
+        chickenModel.current.material.uniforms.uIorG.value = iorG
+        chickenModel.current.material.uniforms.uIorB.value = iorB
     })
 
     const range = (start, end, step = 1) => {
@@ -89,8 +98,8 @@ const ChickenModel = ({ chickenModel, setModelLoaded }) => {
         return output
     }
 
-    const columns = range(-6.5, 6.5, 2.5)
-    const rows = range(-6.5, 6.5, 2.5)
+    const columns = range(-6.5, 6.5, 1.5)
+    const rows = range(-6.5, 6.5, 1.5)
 
     useEffect(() => {
         setModelLoaded(true)
@@ -104,7 +113,7 @@ const ChickenModel = ({ chickenModel, setModelLoaded }) => {
                 {columns.map((col, i) =>
                     rows.map((row, j) => (
                         <mesh key={i + j + 1} position={[col, row, -4]}>
-                            <icosahedronGeometry args={[0.4, 8]} />
+                            <icosahedronGeometry args={[0.333, 8]} />
                             <meshStandardMaterial color="white" />
                         </mesh>
                     ))
