@@ -34,6 +34,7 @@ const ChickenModel = ({ chickenModel, setModelLoaded }) => {
     })
 
     const mainRenderTarget = useFBO()
+    const backRenderTarget = useFBO()
 
     // const iorR = useRef({ value: 1.15 })
     // const iorG = useRef({ value: 1.18 })
@@ -55,13 +56,16 @@ const ChickenModel = ({ chickenModel, setModelLoaded }) => {
         refraction,
     } = useControls({
         light: {
-            value: new THREE.Vector3(-1.0, 1.0, 1.0),
+            value: new THREE.Vector3(-36.0, -5.0, 4.0),
         },
         diffuseness: {
-            value: 0.2,
+            value: 0.34,
         },
         shininess: {
-            value: 40.0,
+            value: 80.0,
+        },
+        fresnelPower: {
+            value: 12.0,
         },
         ior: folder({
             iorR: { min: 1.0, max: 2.333, step: 0.001, value: 1.15 },
@@ -73,13 +77,13 @@ const ChickenModel = ({ chickenModel, setModelLoaded }) => {
         }),
         saturation: { value: 1.08, min: 1, max: 1.25, step: 0.01 },
         chromaticAberration: {
-            value: 0.6,
+            value: 1.14,
             min: 0,
             max: 1.5,
             step: 0.01,
         },
         refraction: {
-            value: 0.4,
+            value: 0.62,
             min: 0,
             max: 1,
             step: 0.01,
@@ -106,6 +110,7 @@ const ChickenModel = ({ chickenModel, setModelLoaded }) => {
             uSaturation: { value: 0.0 },
             uShininess: { value: 40.0 },
             uDiffuseness: { value: 0.2 },
+            uFresnelPower: { value: 8.0 },
             uLight: {
                 value: new THREE.Vector3(-1.0, 1.0, 1.0),
             },
@@ -118,20 +123,43 @@ const ChickenModel = ({ chickenModel, setModelLoaded }) => {
         []
     )
 
+    // useFrame((state) => {
+    //     const { gl, scene, camera } = state
+    //     chickenModel.current.visible = false
+    //     gl.setRenderTarget(mainRenderTarget)
+    //     gl.render(scene, camera)
+
+    //     chickenModel.current.material.uniforms.uTexture.value = mainRenderTarget.texture
+
+    //     gl.setRenderTarget(null)
+    //     chickenModel.current.visible = true
+
+    //     chickenModel.current.material.uniforms.uDiffuseness.value = diffuseness
+    //     chickenModel.current.material.uniforms.uShininess.value = shininess
+    //     chickenModel.current.material.uniforms.uLight.value = new THREE.Vector3(light.x, light.y, light.z)
+
+    //     chickenModel.current.material.uniforms.uFresnelPower.value = fresnelPower
+
+    //     chickenModel.current.material.uniforms.uIorR.value = iorR
+    //     chickenModel.current.material.uniforms.uIorY.value = iorY
+    //     chickenModel.current.material.uniforms.uIorG.value = iorG
+    //     chickenModel.current.material.uniforms.uIorC.value = iorC
+    //     chickenModel.current.material.uniforms.uIorB.value = iorB
+    //     chickenModel.current.material.uniforms.uIorP.value = iorP
+
+    //     chickenModel.current.material.uniforms.uSaturation.value = saturation
+    //     chickenModel.current.material.uniforms.uChromaticAberration.value = chromaticAberration
+    //     chickenModel.current.material.uniforms.uRefractPower.value = refraction
+    // })
+
     useFrame((state) => {
         const { gl, scene, camera } = state
         chickenModel.current.visible = false
-        gl.setRenderTarget(mainRenderTarget)
-        gl.render(scene, camera)
-
-        chickenModel.current.material.uniforms.uTexture.value = mainRenderTarget.texture
-
-        gl.setRenderTarget(null)
-        chickenModel.current.visible = true
 
         chickenModel.current.material.uniforms.uDiffuseness.value = diffuseness
         chickenModel.current.material.uniforms.uShininess.value = shininess
         chickenModel.current.material.uniforms.uLight.value = new THREE.Vector3(light.x, light.y, light.z)
+        chickenModel.current.material.uniforms.uFresnelPower.value = fresnelPower
 
         chickenModel.current.material.uniforms.uIorR.value = iorR
         chickenModel.current.material.uniforms.uIorY.value = iorY
@@ -143,6 +171,22 @@ const ChickenModel = ({ chickenModel, setModelLoaded }) => {
         chickenModel.current.material.uniforms.uSaturation.value = saturation
         chickenModel.current.material.uniforms.uChromaticAberration.value = chromaticAberration
         chickenModel.current.material.uniforms.uRefractPower.value = refraction
+
+        gl.setRenderTarget(backRenderTarget)
+        gl.render(scene, camera)
+
+        chickenModel.current.material.uniforms.uTexture.value = backRenderTarget.texture
+        chickenModel.current.material.side = THREE.BackSide
+
+        chickenModel.current.visible = true
+
+        gl.setRenderTarget(mainRenderTarget)
+        gl.render(scene, camera)
+
+        chickenModel.current.material.uniforms.uTexture.value = mainRenderTarget.texture
+        chickenModel.current.material.side = THREE.FrontSide
+
+        gl.setRenderTarget(null)
     })
 
     const range = (start, end, step = 1) => {
@@ -168,7 +212,11 @@ const ChickenModel = ({ chickenModel, setModelLoaded }) => {
     return (
         <>
             <color attach="background" args={['#555555']} />
-            <group>
+            <mesh visible={false} position={[0, 0, -4]}>
+                <icosahedronGeometry args={[1, 8]} />
+                <meshBasicMaterial color="white" />
+            </mesh>
+            <group visible={false}>
                 {columns.map((col, i) =>
                     rows.map((row, j) => (
                         <mesh key={i + j + 1} position={[col, row, -4]}>
@@ -178,6 +226,24 @@ const ChickenModel = ({ chickenModel, setModelLoaded }) => {
                     ))
                 )}
             </group>
+            {/* <group visible={true}>
+                <mesh position={[-4, -3, -4]}>
+                    <icosahedronGeometry args={[2, 16]} />
+                    <meshBasicMaterial color="white" />
+                </mesh>
+                <mesh position={[4, -3, -4]}>
+                    <icosahedronGeometry args={[2, 16]} />
+                    <meshBasicMaterial color="white" />
+                </mesh>
+                <mesh position={[-5, 3, -4]}>
+                    <icosahedronGeometry args={[2, 16]} />
+                    <meshBasicMaterial color="white" />
+                </mesh>
+                <mesh position={[5, 3, -4]}>
+                    <icosahedronGeometry args={[2, 16]} />
+                    <meshBasicMaterial color="white" />
+                </mesh>
+            </group> */}
             <mesh
                 ref={chickenModel}
                 dispose={null}
@@ -185,7 +251,7 @@ const ChickenModel = ({ chickenModel, setModelLoaded }) => {
                 position={[0, 0.5, 1]}
                 scale={[1, 1, 1]}
                 rotation={[0, 0, 0]}>
-                {/* <icosahedronGeometry args={[2.84, 20]} /> */}
+                {/* <torusGeometry args={[3, 1, 32, 100]} /> */}
                 <shaderMaterial
                     key={uuidv4()}
                     vertexShader={vertexShader}

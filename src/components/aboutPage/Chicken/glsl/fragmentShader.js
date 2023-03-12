@@ -9,6 +9,7 @@ uniform float uIorP;
 uniform float uSaturation;
 uniform float uChromaticAberration;
 uniform float uRefractPower;
+uniform float uFresnelPower;
 uniform float uShininess;
 uniform float uDiffuseness;
 uniform vec3 uLight;
@@ -23,6 +24,13 @@ vec3 sat(vec3 rgb, float adjustment) {
   const vec3 W = vec3(0.2125, 0.7154, 0.0721);
   vec3 intensity = vec3(dot(rgb, W));
   return mix(intensity, rgb, adjustment);
+}
+
+float fresnel(vec3 eyeVector, vec3 worldNormal, float power) {
+  float fresnelFactor = abs(dot(eyeVector, worldNormal));
+  float inversefresnelFactor = 1.0 - fresnelFactor;
+
+  return pow(inversefresnelFactor, power);
 }
 
 float specular(vec3 light, float shininess, float diffuseness) {
@@ -95,6 +103,10 @@ void main() {
   // Specular
   float specularLight = specular(uLight, uShininess, uDiffuseness);
   color += specularLight;
+
+  // Fresnel
+  float f = fresnel(eyeVector, normal, uFresnelPower);
+  color.rgb += f * vec3(1.0);
 
   gl_FragColor = vec4(color, 1.0);
 }
