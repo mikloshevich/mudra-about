@@ -28,7 +28,7 @@ import { BlendFunction, KernelSize } from 'postprocessing'
 // https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/circus_arena_1k.hdr
 const ChickenModel = ({ chickenModel, setModelLoaded }) => {
     const { scene } = useGLTF(model)
-    const texture = useCubeTexture([hdriBlack, hdriBlack, hdriNew5, hdriBlack, hdriBlack, hdriNew5], { path: '' })
+    const texture = useCubeTexture([hdriBlack, hdriBlack, hdriBlack, hdriBlack, hdriBlack, hdriNew5], { path: '' })
     // const texture = useEnvironment({
     //     files: 'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/shanghai_bund_1k.hdr',
     // })
@@ -67,7 +67,7 @@ const ChickenModel = ({ chickenModel, setModelLoaded }) => {
                         ior={1.5}
                         color={0xaaaaaa}
                         flatShading={true}
-                        transparent={false}
+                        transparent={true}
                         envMapIntensity={0.5}
                         envMap={texture}
                         // opacity={0.0}
@@ -91,23 +91,23 @@ const AboutChicken = ({ chickenModel, setModelLoaded }) => {
                             <ambientLight intensity={3} />
                             <spotLight position={[5, 1, 15]} lookAt={[0, 0, 0]} intensity={10} color={0xeeeeee} />
                             <spotLight position={[-5, 1, 15]} lookAt={[0, 0, 0]} intensity={10} color={0xeeeeee} />
-                            <spotLight position={[0, 10, 15]} lookAt={[0, 0, 0]} intensity={10} color={0xeeeeee} />
+                            <spotLight position={[0, -5, 15]} lookAt={[0, 0, 0]} intensity={10} color={0xeeeeee} />
                             <spotLight
-                                position={[-3, 0, 7]}
+                                position={[0, 0, 7]}
                                 lookAt={[0, 0, 0]}
-                                intensity={10}
+                                intensity={5}
                                 // penumbra={0.5}
                                 color={0xeb3434}
                             />
                             <spotLight
-                                position={[0, 4, 10]}
+                                position={[-5, -5, 10]}
                                 lookAt={[0, 0, 0]}
                                 intensity={20}
                                 // penumbra={0.5}
                                 color={0x34a1eb}
                             />
                             <spotLight
-                                position={[3, 0, 7]}
+                                position={[5, -5, 10]}
                                 lookAt={[0, 0, 0]}
                                 intensity={15}
                                 // penumbra={0.5}
@@ -122,19 +122,6 @@ const AboutChicken = ({ chickenModel, setModelLoaded }) => {
                                 preset={null}
                             /> */}
                     </Suspense>
-                    <EffectComposer>
-                        {/* luminanceThreshold={1} radius={1} intensity={0.5} levels={9} mipmapBlur */}
-                        <Bloom
-                            // luminanceThreshold={0.8}
-                            // luminanceSmoothing={0.9}
-                            intensity={8.5}
-                            // // blendFunction={BlendFunction.MULTIPLY}
-                            // // opacity={0.5}
-                            // // kernelSize={KernelSize.SMALL}
-                            // // radius={0.4}
-                            // mipmapBlur
-                        />
-                    </EffectComposer>
                 </Canvas>
             </div>
             <div className="aboutChicken__container">
