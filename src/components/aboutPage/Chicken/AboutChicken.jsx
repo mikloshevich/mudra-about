@@ -35,15 +35,45 @@ const ChickenModel = ({ chickenModel, setModelLoaded }) => {
 
     const mainRenderTarget = useFBO()
 
-    const { iorR, iorG, iorB, saturation, chromaticAberration, refraction } = useControls({
+    // const iorR = useRef({ value: 1.15 })
+    // const iorG = useRef({ value: 1.18 })
+    // const iorB = useRef({ value: 1.22 })
+
+    const {
+        light,
+        shininess,
+        diffuseness,
+        fresnelPower,
+        iorR,
+        iorY,
+        iorG,
+        iorC,
+        iorB,
+        iorP,
+        saturation,
+        chromaticAberration,
+        refraction,
+    } = useControls({
+        light: {
+            value: new THREE.Vector3(-1.0, 1.0, 1.0),
+        },
+        diffuseness: {
+            value: 0.2,
+        },
+        shininess: {
+            value: 40.0,
+        },
         ior: folder({
             iorR: { min: 1.0, max: 2.333, step: 0.001, value: 1.15 },
+            iorY: { min: 1.0, max: 2.333, step: 0.001, value: 1.16 },
             iorG: { min: 1.0, max: 2.333, step: 0.001, value: 1.18 },
+            iorC: { min: 1.0, max: 2.333, step: 0.001, value: 1.22 },
             iorB: { min: 1.0, max: 2.333, step: 0.001, value: 1.22 },
+            iorP: { min: 1.0, max: 2.333, step: 0.001, value: 1.22 },
         }),
-        saturation: { value: 1.06, min: 1, max: 1.25, step: 0.01 },
+        saturation: { value: 1.08, min: 1, max: 1.25, step: 0.01 },
         chromaticAberration: {
-            value: 0.5,
+            value: 0.6,
             min: 0,
             max: 1.5,
             step: 0.01,
@@ -56,24 +86,17 @@ const ChickenModel = ({ chickenModel, setModelLoaded }) => {
         },
     })
 
-    // const iorR = useRef({ value: 1.15 })
-    // const iorG = useRef({ value: 1.18 })
-    // const iorB = useRef({ value: 1.22 })
-
     const uniforms = useMemo(
         () => ({
             uTexture: {
                 value: null,
             },
-            uIorR: {
-                value: 1.0,
-            },
-            uIorG: {
-                value: 1.0,
-            },
-            uIorB: {
-                value: 1.0,
-            },
+            uIorR: { value: 1.0 },
+            uIorY: { value: 1.0 },
+            uIorG: { value: 1.0 },
+            uIorC: { value: 1.0 },
+            uIorB: { value: 1.0 },
+            uIorP: { value: 1.0 },
             uRefractPower: {
                 value: 0.2,
             },
@@ -81,6 +104,11 @@ const ChickenModel = ({ chickenModel, setModelLoaded }) => {
                 value: 1.0,
             },
             uSaturation: { value: 0.0 },
+            uShininess: { value: 40.0 },
+            uDiffuseness: { value: 0.2 },
+            uLight: {
+                value: new THREE.Vector3(-1.0, 1.0, 1.0),
+            },
             winResolution: {
                 value: new THREE.Vector2(window.innerWidth, window.innerHeight).multiplyScalar(
                     Math.min(window.devicePixelRatio, 2)
@@ -101,9 +129,16 @@ const ChickenModel = ({ chickenModel, setModelLoaded }) => {
         gl.setRenderTarget(null)
         chickenModel.current.visible = true
 
+        chickenModel.current.material.uniforms.uDiffuseness.value = diffuseness
+        chickenModel.current.material.uniforms.uShininess.value = shininess
+        chickenModel.current.material.uniforms.uLight.value = new THREE.Vector3(light.x, light.y, light.z)
+
         chickenModel.current.material.uniforms.uIorR.value = iorR
+        chickenModel.current.material.uniforms.uIorY.value = iorY
         chickenModel.current.material.uniforms.uIorG.value = iorG
+        chickenModel.current.material.uniforms.uIorC.value = iorC
         chickenModel.current.material.uniforms.uIorB.value = iorB
+        chickenModel.current.material.uniforms.uIorP.value = iorP
 
         chickenModel.current.material.uniforms.uSaturation.value = saturation
         chickenModel.current.material.uniforms.uChromaticAberration.value = chromaticAberration
