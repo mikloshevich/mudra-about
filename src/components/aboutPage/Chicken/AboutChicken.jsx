@@ -1,192 +1,187 @@
 import { Suspense, useEffect, useMemo, useRef } from 'react'
-import { Canvas, useFrame } from '@react-three/fiber'
-import {
-    CubeCamera,
-    Environment,
-    useGLTF,
-    useFBO,
-    useCubeTexture,
-    useEnvironment,
-    OrbitControls,
-} from '@react-three/drei'
 import * as THREE from 'three'
-import { Leva, folder, useControls } from 'leva'
-import model from '../../../assets/aboutPage/chicken/gltf/chicken3_threejs_smooth2.gltf?url'
-import hdri1 from '../../../assets/aboutPage/chicken/mudra-studio-hdri/hdri1.png'
-import hdri6 from '../../../assets/aboutPage/chicken/mudra-studio-hdri/hdri6.png'
-import hdri7 from '../../../assets/aboutPage/chicken/mudra-studio-hdri/hdri7.png'
-import hdriNew1 from '../../../assets/aboutPage/chicken/mudra-studio-hdri/hdriNew1.png'
-import hdriNew2 from '../../../assets/aboutPage/chicken/mudra-studio-hdri/hdriNew2.png'
-import hdriNew5 from '../../../assets/aboutPage/chicken/mudra-studio-hdri/hdriNew5.png'
-import hdriBlack from '../../../assets/aboutPage/chicken/mudra-studio-hdri/hdriBlack.png'
-import fragmentShader from './glsl/fragmentShader'
-import vertexShader from './glsl/vertexShader'
+import { Canvas, useFrame, useThree, extend } from '@react-three/fiber'
+import { useGLTF, useFBO, OrbitControls, Svg, OrthographicCamera } from '@react-three/drei'
 import { v4 as uuidv4 } from 'uuid'
 
-// https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/shanghai_bund_1k.hdr
-// https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/syferfontein_1d_clear_puresky_1k.hdr
-// https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/circus_arena_1k.hdr
+import model from '../../../assets/aboutPage/chicken/gltf/chicken3_threejs_smooth2.gltf?url'
+import svgChicken from '../../../assets/aboutPage/chicken/chickenChicken-02.svg'
+
+import RefractionMaterial from './materials/RefractionMaterial/RefractionMaterial'
+import BrightnessMaterial from './materials/BrightnessMaterial/BrightnessMaterial'
+import BlurMaterial from './materials/BlurMaterial/BlurMaterial'
+import BlurMaterial2 from './materials/BlurMaterial2/BlurMaterial'
+import ComposeMaterial from './materials/ComposeMaterial/ComposeMaterial'
+
+extend({ RefractionMaterial })
+
 const ChickenModel = ({ chickenModel, setModelLoaded }) => {
     const { scene } = useGLTF(model)
-    // const texture = useCubeTexture([hdriBlack, hdriBlack, hdriBlack, hdriBlack, hdriBlack, hdriNew5], { path: '' })
-    const texture = useEnvironment({
-        files: 'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/shanghai_bund_1k.hdr',
-    })
 
-    const mainRenderTarget = useFBO()
-    const backRenderTarget = useFBO()
+    const background = useRef()
+    const brightnessPlane = useRef()
+    const screen = useRef()
+    const screenCamera = useRef()
 
-    // const iorR = useRef({ value: 1.15 })
-    // const iorG = useRef({ value: 1.18 })
-    // const iorB = useRef({ value: 1.22 })
+    const firstRenderTarget = useFBO()
+    const chickenRenderTarget = useFBO()
+    const brigthnessTarget = useFBO()
+    const blurTarget = useFBO()
+    const blurTargetA = useFBO()
+    const blurTargetB = useFBO()
+    const finalTarget = useFBO()
 
-    const {
-        light,
-        shininess,
-        diffuseness,
-        fresnelPower,
-        iorR,
-        iorY,
-        iorG,
-        iorC,
-        iorB,
-        iorP,
-        saturation,
-        chromaticAberration,
-        refraction,
-    } = useControls({
-        light: {
-            value: new THREE.Vector3(-36.0, -5.0, 4.0),
-        },
-        diffuseness: {
-            value: 0.34,
-        },
-        shininess: {
-            value: 80.0,
-        },
-        fresnelPower: {
-            value: 12.0,
-        },
-        ior: folder({
-            iorR: { min: 1.0, max: 2.333, step: 0.001, value: 1.15 },
-            iorY: { min: 1.0, max: 2.333, step: 0.001, value: 1.16 },
-            iorG: { min: 1.0, max: 2.333, step: 0.001, value: 1.18 },
-            iorC: { min: 1.0, max: 2.333, step: 0.001, value: 1.22 },
-            iorB: { min: 1.0, max: 2.333, step: 0.001, value: 1.22 },
-            iorP: { min: 1.0, max: 2.333, step: 0.001, value: 1.22 },
-        }),
-        saturation: { value: 1.08, min: 1, max: 1.25, step: 0.01 },
-        chromaticAberration: {
-            value: 1.14,
-            min: 0,
-            max: 1.5,
-            step: 0.01,
-        },
-        refraction: {
-            value: 0.62,
-            min: 0,
-            max: 1,
-            step: 0.01,
-        },
-    })
+    const { size, camera } = useThree()
 
     const uniforms = useMemo(
         () => ({
             uTexture: {
                 value: null,
             },
-            uIorR: { value: 1.0 },
-            uIorY: { value: 1.0 },
-            uIorG: { value: 1.0 },
-            uIorC: { value: 1.0 },
-            uIorB: { value: 1.0 },
-            uIorP: { value: 1.0 },
-            uRefractPower: {
-                value: 0.2,
+            uBrightTex: {
+                value: null,
             },
-            uChromaticAberration: {
-                value: 1.0,
+            uBlurTex: {
+                value: null,
             },
-            uSaturation: { value: 0.0 },
-            uShininess: { value: 40.0 },
-            uDiffuseness: { value: 0.2 },
-            uFresnelPower: { value: 8.0 },
-            uLight: {
-                value: new THREE.Vector3(-1.0, 1.0, 1.0),
+            uTime: {
+                value: 0,
+            },
+            uRefractStage: {
+                value: 0,
             },
             winResolution: {
-                value: new THREE.Vector2(window.innerWidth, window.innerHeight).multiplyScalar(
+                value: new THREE.Vector2(size.width, size.height).multiplyScalar(
                     Math.min(window.devicePixelRatio, 2)
                 ), // if DPR is 3 the shader glitches 🤷‍♂️
+            },
+            flatShading: {
+                value: true,
             },
         }),
         []
     )
 
-    // useFrame((state) => {
-    //     const { gl, scene, camera } = state
-    //     chickenModel.current.visible = false
-    //     gl.setRenderTarget(mainRenderTarget)
-    //     gl.render(scene, camera)
+    const attributes = useMemo(() => {
+        const geometry = scene.children[0].geometry
+        const len = geometry.attributes.normal.array.length
+        const values = []
+        // console.log(geometry.attributes.normal.array[0])
+        for (let i = 0; i < len; i++) {
+            // values.push(geometry.attributes.normal.array[i] * 2)
+            values.push(Math.random() * 10)
+        }
+        const attrs = {
+            position: {
+                value: new Float32Array(geometry.attributes.position.array), // geometry.attributes.position,
+            },
+            normal: {
+                value: geometry.attributes.normal,
+            },
+            indices: {
+                value: geometry.index,
+            },
+            displacement: {
+                value: new Float32Array(values),
+            },
+        }
+        return attrs
+    }, [scene])
 
-    //     chickenModel.current.material.uniforms.uTexture.value = mainRenderTarget.texture
+    const brightMaterial = useRef(new BrightnessMaterial(uniforms))
+    const blurMaterial = useRef(new BlurMaterial(uniforms))
+    const hBlurMaterial = useRef(new BlurMaterial2(new THREE.Vector2(1, 0)))
+    const vBlurMaterial = useRef(new BlurMaterial2(new THREE.Vector2(0, 1)))
+    const composeMaterial = useRef(new ComposeMaterial())
 
-    //     gl.setRenderTarget(null)
-    //     chickenModel.current.visible = true
+    useEffect(() => {
+        // console.clear()
+        hBlurMaterial.current.uniforms.winResolution.value = uniforms.winResolution.value
+        vBlurMaterial.current.uniforms.winResolution.value = uniforms.winResolution.value
+        chickenModel.current.geometry.setAttribute(
+            'displacement',
+            new THREE.BufferAttribute(attributes.displacement.value, 3)
+        )
 
-    //     chickenModel.current.material.uniforms.uDiffuseness.value = diffuseness
-    //     chickenModel.current.material.uniforms.uShininess.value = shininess
-    //     chickenModel.current.material.uniforms.uLight.value = new THREE.Vector3(light.x, light.y, light.z)
-
-    //     chickenModel.current.material.uniforms.uFresnelPower.value = fresnelPower
-
-    //     chickenModel.current.material.uniforms.uIorR.value = iorR
-    //     chickenModel.current.material.uniforms.uIorY.value = iorY
-    //     chickenModel.current.material.uniforms.uIorG.value = iorG
-    //     chickenModel.current.material.uniforms.uIorC.value = iorC
-    //     chickenModel.current.material.uniforms.uIorB.value = iorB
-    //     chickenModel.current.material.uniforms.uIorP.value = iorP
-
-    //     chickenModel.current.material.uniforms.uSaturation.value = saturation
-    //     chickenModel.current.material.uniforms.uChromaticAberration.value = chromaticAberration
-    //     chickenModel.current.material.uniforms.uRefractPower.value = refraction
-    // })
+        setModelLoaded(true)
+        return () => setModelLoaded(false)
+    }, [])
 
     useFrame((state) => {
-        const { gl, scene, camera } = state
+        const { clock, gl, scene, camera } = state
+
+        // glowRef.current.visible = false
+        // brightnessPlane.current.visible = false
+        // blurPlane.current.visible = false
+        screen.current.visible = false
         chickenModel.current.visible = false
-
-        chickenModel.current.material.uniforms.uDiffuseness.value = diffuseness
-        chickenModel.current.material.uniforms.uShininess.value = shininess
-        chickenModel.current.material.uniforms.uLight.value = new THREE.Vector3(light.x, light.y, light.z)
-        chickenModel.current.material.uniforms.uFresnelPower.value = fresnelPower
-
-        chickenModel.current.material.uniforms.uIorR.value = iorR
-        chickenModel.current.material.uniforms.uIorY.value = iorY
-        chickenModel.current.material.uniforms.uIorG.value = iorG
-        chickenModel.current.material.uniforms.uIorC.value = iorC
-        chickenModel.current.material.uniforms.uIorB.value = iorB
-        chickenModel.current.material.uniforms.uIorP.value = iorP
-
-        chickenModel.current.material.uniforms.uSaturation.value = saturation
-        chickenModel.current.material.uniforms.uChromaticAberration.value = chromaticAberration
-        chickenModel.current.material.uniforms.uRefractPower.value = refraction
-
-        gl.setRenderTarget(backRenderTarget)
-        gl.render(scene, camera)
-
-        chickenModel.current.material.uniforms.uTexture.value = backRenderTarget.texture
-        chickenModel.current.material.side = THREE.BackSide
-
-        chickenModel.current.visible = true
-
-        gl.setRenderTarget(mainRenderTarget)
-        gl.render(scene, camera)
-
-        chickenModel.current.material.uniforms.uTexture.value = mainRenderTarget.texture
-        chickenModel.current.material.side = THREE.FrontSide
+        background.current.visible = true
 
         gl.setRenderTarget(null)
+        gl.render(scene, camera)
+
+        gl.setRenderTarget(chickenRenderTarget)
+        gl.render(scene, camera)
+        // gl.setRenderTarget(null)
+
+        chickenModel.current.material.uniforms.uRefractStage.value = 0
+        chickenModel.current.material.uniforms.uTexture.value = chickenRenderTarget.texture
+
+        chickenModel.current.visible = true
+        background.current.visible = false
+
+        gl.setRenderTarget(firstRenderTarget)
+        gl.render(scene, camera)
+
+        // brightMaterial.current.uniforms.uBrightTex.value = firstRenderTarget.texture
+        // screen.current.material = brightMaterial.current
+
+        chickenModel.current.material.uniforms.uRefractStage.value = 1
+        chickenModel.current.material.uniforms.uTexture.value = firstRenderTarget.texture
+
+        gl.setRenderTarget(brigthnessTarget)
+        gl.render(scene, camera)
+
+        brightMaterial.current.uniforms.uBrightTex.value = brigthnessTarget.texture
+        screen.current.material = brightMaterial.current
+
+        chickenModel.current.visible = false
+        screen.current.visible = true
+
+        // gl.setRenderTarget(blurTarget)
+        // gl.render(screen.current, screenCamera.current)
+
+        // blurMaterial.current.uniforms.uBlurTex.value = blurTarget.texture
+        // screen.current.material = blurMaterial.current
+
+        // gl.setRenderTarget(finalTarget)
+        // gl.render(screen.current, screenCamera.current)
+
+        gl.setRenderTarget(blurTargetA)
+        gl.render(screen.current, screenCamera.current)
+        hBlurMaterial.current.uniforms.tBlur.value = blurTargetA.texture
+        screen.current.material = hBlurMaterial.current
+
+        gl.setRenderTarget(blurTargetB)
+        gl.render(screen.current, screenCamera.current)
+        vBlurMaterial.current.uniforms.tBlur.value = blurTargetB.texture
+        screen.current.material = vBlurMaterial.current
+        gl.setRenderTarget(blurTarget)
+        gl.render(screen.current, screenCamera.current)
+
+        composeMaterial.current.uniforms.tOriginal.value = firstRenderTarget.texture
+        composeMaterial.current.uniforms.tFirst.value = brigthnessTarget.texture
+        composeMaterial.current.uniforms.tBright.value = blurTargetA.texture
+        composeMaterial.current.uniforms.tBlur.value = blurTarget.texture
+        screen.current.material = composeMaterial.current
+
+        gl.setRenderTarget(null)
+        gl.render(screen.current, screenCamera.current)
+
+        background.current.visible = true
+
+        // chickenModel.current.rotation.y = clock.getElapsedTime() * 0.5
+        chickenModel.current.material.uniforms.uTime.value = clock.getElapsedTime() * 3
     })
 
     const range = (start, end, step = 1) => {
@@ -201,63 +196,33 @@ const ChickenModel = ({ chickenModel, setModelLoaded }) => {
         return output
     }
 
-    const columns = range(-6.5, 6.5, 1.5)
-    const rows = range(-6.5, 6.5, 1.5)
-
-    useEffect(() => {
-        setModelLoaded(true)
-        return () => setModelLoaded(false)
-    }, [])
+    const cols = range(-30, 35, 5)
+    const rows = range(-25, 40, 5)
 
     return (
         <>
-            <color attach="background" args={['#555555']} />
-            <mesh visible={false} position={[0, 0, -4]}>
-                <icosahedronGeometry args={[1, 8]} />
-                <meshBasicMaterial color="white" />
+            <OrthographicCamera ref={screenCamera} position={[0, 0, 0]} lookAt={[0, 0, 0]} />
+            <mesh ref={screen} frustumCulled={false}>
+                <planeGeometry args={[2, 2, 1, 1]} />
             </mesh>
-            <group visible={false}>
-                {columns.map((col, i) =>
-                    rows.map((row, j) => (
-                        <mesh key={i + j + 1} position={[col, row, -4]}>
-                            <icosahedronGeometry args={[0.333, 8]} />
-                            <meshStandardMaterial color="white" />
-                        </mesh>
-                    ))
-                )}
-            </group>
-            {/* <group visible={true}>
-                <mesh position={[-4, -3, -4]}>
-                    <icosahedronGeometry args={[2, 16]} />
-                    <meshBasicMaterial color="white" />
-                </mesh>
-                <mesh position={[4, -3, -4]}>
-                    <icosahedronGeometry args={[2, 16]} />
-                    <meshBasicMaterial color="white" />
-                </mesh>
-                <mesh position={[-5, 3, -4]}>
-                    <icosahedronGeometry args={[2, 16]} />
-                    <meshBasicMaterial color="white" />
-                </mesh>
-                <mesh position={[5, 3, -4]}>
-                    <icosahedronGeometry args={[2, 16]} />
-                    <meshBasicMaterial color="white" />
-                </mesh>
-            </group> */}
+            <OrthographicCamera position={[0, 0, 0]}>
+                <group ref={background}>
+                    {cols.map((col, i) =>
+                        rows.map((row, j) => (
+                            <mesh key={i + j} position={[col, row + 8, -35]} scale={[0.01, 0.01, 0.01]}>
+                                <Svg src={svgChicken} fillMaterial={{ color: 0xffffff }} />
+                            </mesh>
+                        ))
+                    )}
+                </group>
+            </OrthographicCamera>
             <mesh
                 ref={chickenModel}
-                dispose={null}
                 geometry={scene.children[0].geometry}
-                position={[0, 0.5, 1]}
-                scale={[1, 1, 1]}
-                rotation={[0, 0, 0]}>
-                {/* <torusGeometry args={[3, 1, 32, 100]} /> */}
-                <shaderMaterial
-                    key={uuidv4()}
-                    vertexShader={vertexShader}
-                    fragmentShader={fragmentShader}
-                    uniforms={uniforms}
-                />
+                position={[0, 0.05, 0]}
+                scale={[0.14, 0.14, 0.14]}
+                dispose={null}>
+                <refractionMaterial key={uuidv4()} args={[uniforms]} />
             </mesh>
         </>
     )
@@ -267,21 +232,11 @@ const AboutChicken = ({ chickenModel, setModelLoaded }) => {
     return (
         <div className="aboutChicken__wrapper">
             <div className="aboutChicken__3DModel">
-                <Canvas
-                    dpr={[1, 2]}
-                    camera={{ position: [0, 0, 16.8], fov: 45 }}
-                    // onCreated={(state) => state.gl.setClearColor(0x171717, 0.0)}
-                >
+                <Canvas dpr={[1, 2]} camera={{ position: [0.2, -0.2, 2.0], fov: 45 }}>
+                    <ambientLight intensity={1} />
+                    {/* <spotLight intensity={2} lookAt={[0, 0, 0]} color={0xffffff} /> */}
                     <Suspense fallback={null}>
-                        <group>
-                            <ambientLight intensity={1} />
-                            <ChickenModel chickenModel={chickenModel} setModelLoaded={setModelLoaded} />
-                        </group>
-                        {/* <Environment preset="forest" /> */}
-                        {/* <Environment
-                                files={[hdriBlack, hdriBlack, hdriNew5, hdriBlack, hdriBlack, hdriNew5]}
-                                preset={null}
-                            /> */}
+                        <ChickenModel chickenModel={chickenModel} setModelLoaded={setModelLoaded} />
                     </Suspense>
                     <OrbitControls enableZoom={false} />
                 </Canvas>
@@ -312,7 +267,7 @@ const AboutChicken = ({ chickenModel, setModelLoaded }) => {
                     <path
                         visibility="hidden"
                         className="chickenChicken"
-                        d="M389.91,127.84c13.38-26.45,43.29-39.48,71.81-40.66-3.31,62.68,15.41,165.75-32.18,217.2,15.65,1.28,48.17,26.85,46.45,27.72-45.05,36.69-89.75,106.18-153.93,66-13.26,8.23-21.9,12.72-21.9,12.72s-8.72-4.52-22.1-12.82C213.83,438.42,169,368.79,124,332.1c-1.57-1,31-26.54,46.71-27.77-46.64-48.25-29.27-157.49-32.12-217.14,33.39.93,68.12,20,77.08,53.93,43.8-2,85.17,31.18,84.5,76.62-.65-45.43,40.62-78.69,84.43-76.62A77,77,0,0,1,389.91,127.84Z"
+                        d="M398.07,117.22C412.66,88.46,445.28,74.28,476.39,73c-3.61,68.17,16.81,180.27-35.1,236.23,17.07,1.4,52.54,29.21,50.67,30.15-49.14,39.91-97.9,115.49-167.9,71.79C309.6,420.12,300.17,425,300.17,425s-9.51-4.92-24.1-13.94C206,455,157.12,379.29,108,339.38c-1.71-1.09,33.81-28.86,50.95-30.2C108.11,256.7,127.05,137.89,124,73c36.42,1,74.3,21.75,84.07,58.66,47.77-2.18,92.9,33.91,92.16,83.33-.7-49.41,44.31-85.58,92.09-83.33A83.55,83.55,0,0,1,398.07,117.22Z"
                     />
                 </svg>
             </div>

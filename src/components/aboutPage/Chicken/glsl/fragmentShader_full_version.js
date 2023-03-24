@@ -9,6 +9,11 @@ uniform float uIorP;
 uniform float uSaturation;
 uniform float uChromaticAberration;
 uniform float uRefractPower;
+uniform float uFresnelPower;
+uniform float uShininess;
+uniform float uDiffuseness;
+uniform vec3 uLight;
+
 uniform vec2 winResolution;
 uniform sampler2D uTexture;
 
@@ -19,6 +24,27 @@ vec3 sat(vec3 rgb, float adjustment) {
   const vec3 W = vec3(0.2125, 0.7154, 0.0721);
   vec3 intensity = vec3(dot(rgb, W));
   return mix(intensity, rgb, adjustment);
+}
+
+float fresnel(vec3 eyeVector, vec3 worldNormal, float power) {
+  float fresnelFactor = abs(dot(eyeVector, worldNormal));
+  float inversefresnelFactor = 1.0 - fresnelFactor;
+
+  return pow(inversefresnelFactor, power);
+}
+
+float specular(vec3 light, float shininess, float diffuseness) {
+  vec3 normal = worldNormal;
+  vec3 lightVector = normalize(-light);
+  vec3 halfVector = normalize(eyeVector + lightVector);
+
+  float NdotL = dot(normal, lightVector);
+  float NdotH =  dot(normal, halfVector);
+  float kDiffuse = max(0.0, NdotL);
+  float NdotH2 = NdotH * NdotH;
+
+  float kSpecular = pow(NdotH2, shininess);
+  return  kSpecular + kDiffuse * diffuseness;
 }
 
 const int LOOP = 16;
@@ -74,6 +100,13 @@ void main() {
   // Divide by the number of layers to normalize colors (rgb values can be worth up to the value of LOOP)
   color /= float( LOOP );
 
+  // Specular
+  float specularLight = specular(uLight, uShininess, uDiffuseness);
+  color += specularLight;
+
+  // Fresnel
+  float f = fresnel(eyeVector, normal, uFresnelPower);
+  color.rgb += f * vec3(1.0);
 
   gl_FragColor = vec4(color, 1.0);
 }

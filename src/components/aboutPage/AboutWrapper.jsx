@@ -365,7 +365,7 @@ const AboutWrapper = () => {
                     chickenTl.to(
                         '.aboutChicken__svg',
                         {
-                            rotateY: 540,
+                            rotateY: 360,
                             autoAlpha: 0,
                         },
                         '3d'
@@ -374,15 +374,15 @@ const AboutWrapper = () => {
                     chickenTl.to(
                         chickenModel?.current.rotation,
                         {
-                            y: Math.PI * 4,
+                            y: Math.PI * 2,
                         },
                         '3d'
                     )
                     chickenTl.to(chickenModel?.current.rotation, {
-                        y: Math.PI * 4 + Math.PI,
+                        y: Math.PI * 2 + Math.PI,
                     })
                     chickenTl.to(chickenModel?.current.rotation, {
-                        y: Math.PI * 5 + Math.PI,
+                        y: Math.PI * 3 + Math.PI,
                     })
                 }
             }, scrollRef.current)
